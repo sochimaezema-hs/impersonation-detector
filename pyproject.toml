@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "impersonation-detector"
-version = "0.0.1"
+version = "0.1.0"
 description = "Detect lookalike domains, spoofed senders, and brand/support-team impersonation in messages — Unicode confusables (UTS #39), mixed-script checks, and learned scoring, built as middleware for messaging platforms."
 readme = "README.md"
 license = { text = "MIT" }
@@ -12,7 +12,7 @@ requires-python = ">=3.10"
 authors = [{ name = "Sochima Ezema" }]
 keywords = ["phishing", "homograph", "unicode", "confusables", "impersonation", "security", "uts39"]
 classifiers = [
-  "Development Status :: 2 - Pre-Alpha",
+  "Development Status :: 3 - Alpha",
   "Intended Audience :: Developers",
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3",
@@ -34,3 +34,8 @@ packages = ["src/impersonation_detector"]
 
 [tool.ruff]
 line-length = 100
+
+[tool.ruff.lint.per-file-ignores]
+"src/impersonation_detector/bench/seed.py" = ["ISC004"]
+"src/impersonation_detector/bench/variants.py" = ["ISC004"]
+"tests/*" = ["ISC004"]

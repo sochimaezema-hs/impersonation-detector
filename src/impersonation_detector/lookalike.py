@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 
 from .distance import osa_distance
 from .scripts import is_mixed_script, scripts_in
-from .skeleton import skeleton
+from .skeleton import fold_skeleton
 
 
 @dataclass(frozen=True)
@@ -43,7 +43,7 @@ class LookalikeDetector:
 
     def __post_init__(self) -> None:
         self.protected = [p.strip() for p in self.protected if p.strip()]
-        self._skeletons = {p: skeleton(p.casefold()) for p in self.protected}
+        self._skeletons = {p: fold_skeleton(p) for p in self.protected}
 
     @staticmethod
     def _decode_idn(text: str) -> str:
@@ -66,7 +66,7 @@ class LookalikeDetector:
         """Return every protected name *candidate* resembles, with reasons."""
         shown = self._decode_idn(candidate)
         folded = shown.casefold()
-        cand_skel = skeleton(folded)
+        cand_skel = fold_skeleton(shown)
         mixed = is_mixed_script(shown)
         matches: list[Match] = []
         for name, prot_skel in self._skeletons.items():

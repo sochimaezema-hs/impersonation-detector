@@ -1,5 +1,9 @@
 from impersonation_detector import (
-    LookalikeDetector, confusable, is_mixed_script, scripts_in, skeleton,
+    LookalikeDetector,
+    confusable,
+    is_mixed_script,
+    scripts_in,
+    skeleton,
 )
 from impersonation_detector.distance import osa_distance
 
@@ -23,6 +27,13 @@ def test_scripts_and_mixed_script():
     assert is_mixed_script("hаndshake")
     assert not is_mixed_script("handshake")
     assert not is_mixed_script("東京 tokyo")  # Han + Latin allowed
+
+
+def test_fold_skeleton_handles_uppercase_prototypes():
+    from impersonation_detector import fold_skeleton
+    assert fold_skeleton("h0me") == fold_skeleton("home")  # '0' maps to 'O' in UTS #39
+    det = LookalikeDetector(["dropbox.com"])
+    assert det.check("dr0pbox.com") and det.check("DROPBOX.C0M")
 
 
 def test_osa_distance():
