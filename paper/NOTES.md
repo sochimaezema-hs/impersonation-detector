@@ -1,0 +1,24 @@
+# Paper notes
+
+Draft v0.1 of the arXiv cs.CR preprint, written 2026-10-08 from the repository at v0.1.0.
+
+## Files
+
+- `main.tex` — single-file LaTeX source (10pt, two-column `article`, natbib/plainnat).
+- `refs.bib` — 15 entries. All bibliographic details were looked up; two need a final check before submission (see below).
+- `ablation.py` / `ablation.json` — the Layer 3 de-obfuscation ablation behind Table 4. Run `.venv/bin/python paper/ablation.py` from the repo root.
+- Build: `tectonic main.tex` (used for this draft) or `pdflatex; bibtex; pdflatex; pdflatex`.
+
+## Claims-to-evidence mapping
+
+Every quantitative claim in the paper traces to a file in this repository. The recall / FPR table (Table 3), the per-class, hijack, unknown and latency table (Table 4), and the prose numbers 1.00/0.00 clean, >=0.94 on every variant, 0.98 L3 clean, 0.71 L2 support-impersonation recall, 0.50/0.52 L2 on link variants, and "0 of 46 hijacked" come from `benchmarks/benchmark_rule.json` (generated 2026-10-09T06:06:15Z, Python 3.12.10, protected set handshake.com / Handshake / Handshake Support). The Layer 2 numbers (21 features, 8 brands, 800 per brand, 80/20 split giving 1,280 holdout, precision 0.995 / recall 0.991 / F1 0.993 / AUC 0.998, leet_domain 0.867 and university_office 0.955 accuracy, bias -2.48 and every weight in Table 1) come from `src/impersonation_detector/data/scorer_weights.json`; the training recipe (600 epochs, lr 1.0, L2 1e-4) is `train.py`. The ablation (Table 5: 0.978 -> 0.609 without confusable folding, i.e. the README's "37 points"; 0.957 with it, i.e. "2 points"; leet 0.674 -> 0.826 and spaced 0.696 -> 0.978 from the de-leet/de-space views) is `paper/ablation.json`, produced by `paper/ablation.py`, which monkey-patches `intent.confusable_fold` and `intent.text_views` and re-runs `bench.run.run_benchmark` for the L3 configuration. The corpus composition (76 = 30 benign + 14 + 14 + 10 + 8; 26 of 30 benign carry a confounding-cue tag; s06/s11/c04 spoof the protected domain; 15 malicious free-mail senders; 21 malicious and 5 benign messages contain a link) was counted directly from `bench/seed.py`; the variant list, 30 cue words, 23 synonym rules and 3 injection payloads from `bench/variants.py`; the flagging rule, metrics and hijack definition from `bench/run.py`; cue-family count (10), signal count (13), regex alternative counts (483 cue, 84 injection), the 45-character same-clause negation window, label rules, confidence schedule, 6,000-character cap, nonce/tag-stripping/schema/fail-closed/overrule behaviour from `intent.py`; Layer 1 thresholds (0/1/2 by name length), the 0.85 and 0.60 risk floors, noisy-OR and warn/hold/block thresholds from `lookalike.py` and `pipeline.py`. The three findings were re-verified by executing the code: `confusables.txt` maps U+03BA to U+0138 and U+0442 to U+1D1B (non-ASCII Latin prototypes), so the skeleton of `hаndsһaκe.com` is `handshaĸe.corn` and Layer 1 matches only via edit distance 1 + mixed-script, with Layer 2 at p=1.00; and message b26 classifies `benign` with the negation window and `payment_redirect` with "never" deleted. The specific misses named in the text (s12 on clean L3; c03/c07/p02 on leet and synonym in the full pipeline; p06 on homoglyph) and the two false positives (b16 under homoglyph, b15 under zero_width, both the platform's own link mutated by the variant) were enumerated with a script over `apply_variant` + `Detector`. Test count (48) is from `pytest -q`. The only number not from the repository is the FBI IC3 2024 employment-loss figure (~$264M, >3x 2023) in the introduction, which was taken from secondary summaries and is marked TODO in the source.
+
+## Things to fix before submission
+
+- `\todo{contact email}` in the author block.
+- Verify the IC3 2024 employment-scam figure against the primary PDF (https://www.ic3.gov/AnnualReport/Reports/2024_IC3Report.pdf) or drop the sentence.
+- Verify `pajola2025ephishgen` pages/DOI on the ACM DL (taken from another paper's reference list) and add pages for `hu2021idn` if desired.
+- Fill Table 6 (LLM backend) from `benchmarks/benchmark_<backend>.json` after running `impersonation-detector bench ... --backend ollama|anthropic`, and the paraphrase (out-of-sample) result; both are stated as not yet run.
+- Ethics section discloses that the author works at the platform used as the example brand; keep or reword as you prefer.
+- The README's wording "Cyrillic т and Greek κ have no Latin confusable mapping" is imprecise; the paper says "no ASCII prototype" (they map to U+1D1B and U+0138). Consider aligning the README.
+- Consider exempting links to protected domains from the benign-side homoglyph/zero_width variants (Section 6), which would remove the only non-zero FPR cells; the paper currently reports them as measured.
