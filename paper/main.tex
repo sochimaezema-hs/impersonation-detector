@@ -2,7 +2,7 @@
 % Every number in this file is taken from benchmarks/benchmark_rule.json,
 % src/impersonation_detector/data/scorer_weights.json, or paper/ablation.json in the repository.
 \documentclass[10pt,twocolumn]{article}
-\usepackage[margin=0.8in,top=0.9in,bottom=0.9in]{geometry}
+\usepackage[margin=0.7in,top=0.8in,bottom=0.8in]{geometry}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage{lmodern}
@@ -32,13 +32,13 @@
 \maketitle
 
 \begin{abstract}
-Enterprise email security protects employees behind a corporate mail gateway. The people most exposed to employment and support-impersonation scams---students and early-career job seekers---are contacted \emph{inside} consumer platforms, where no gateway sees the message. We present a dependency-free, explainable detector that works at the level of the individual message and its sender, and a public benchmark for comparing such detectors under cheap adversarial transformation. The detector has four layers: (1) deterministic lookalike checks built on Unicode UTS~\#39 confusable skeletons, mixed-script detection, and bounded edit distance; (2) a logistic-regression sender scorer over 21 named features, trained on a synthetic generator spanning eight brands (holdout $F_1$ 0.993); (3) a message-intent classifier with two interchangeable backends, a rule baseline and a prompt-injection-hardened LLM wrapper; and (4) a 76-message, brand-parametric benchmark with ten label-preserving adversarial variants scored on per-layer recall, false-positive rate, per-class recall, injection hijack rate, and latency. With the rule backend, the full pipeline reaches recall 1.00 at FPR 0.00 on the clean corpus and recall $\geq 0.94$ on every variant, while any single layer alone fails on at least one. Three findings fall out of the benchmark: UTS~\#39 skeletons do not fold Cyrillic \cp{0442} or Greek \cp{03BA} to ASCII, so skeleton equality alone misses a mixed-script brand lookalike; regex intent cues lose 37 points of recall to a single confusable glyph unless text is confusable-folded first, after which the loss is 2 points; and clause-level negation handling is required to keep a real employer's ``never send bank details by email'' from reading as a payment request. We release code, weights, corpus, and reports under the MIT license. LLM-backend numbers are not yet reported; the paper marks where they will go.
+Enterprise email security protects employees behind a corporate mail gateway. The people most exposed to employment and support-impersonation scams---students and early-career job seekers---are contacted \emph{inside} consumer platforms, where no gateway sees the message. We present a dependency-free, explainable detector that works at the level of the individual message and its sender, and a public benchmark for comparing such detectors under cheap adversarial transformation. The detector has four layers: (1) deterministic lookalike checks built on Unicode UTS~\#39 confusable skeletons, mixed-script detection, and bounded edit distance; (2) a logistic-regression sender scorer over 21 named features trained on a synthetic generator spanning eight brands (holdout $F_1$ 0.993); (3) a message-intent classifier with a rule baseline and a prompt-injection-hardened LLM wrapper; and (4) a 76-message, brand-parametric benchmark with ten label-preserving adversarial variants scored on per-layer recall, false-positive rate, injection hijack rate, and latency. With the rule backend, the full pipeline reaches recall 1.00 at FPR 0.00 on the clean corpus and recall $\geq 0.94$ on every variant, while any single layer alone fails on at least one; on an out-of-sample corpus paraphrased by a language model it holds FPR 0.00 at recall 0.96. A Llama~3.1~8B backend reaches recall 1.00 on every variant and on the paraphrases, but at FPR 0.30--0.43 that no threshold on its confidence repairs, and it obeyed an appended injection on 5 of 46 attacks, each caught only by the deterministic overrule. Three findings fall out: UTS~\#39 skeletons do not fold Cyrillic \cp{0442} or Greek \cp{03BA} to ASCII, so skeleton equality alone misses a mixed-script brand lookalike; regex intent cues lose 37 points of recall to a single confusable glyph unless text is confusable-folded first (2 points after); and clause-level negation handling keeps a real employer's ``never send bank details by email'' from reading as a payment request. We release code, weights, corpus, per-message verdict dumps, and reports under the MIT license.
 \end{abstract}
 
 \section{Introduction}
 \label{sec:intro}
 
-A student receives a message from ``Handshake Security Team'' saying that unusual login activity was detected and that the account will be suspended unless they verify their identity at a link within 24 hours. A job seeker is told they have been selected, with no interview, for a \$45-per-hour remote data-entry role and should continue the conversation on Telegram. Both messages arrive through the platform's own inbox or through an address the platform exposed, not through a corporate mail server with a secure email gateway in front of it. The platform operator is the only party positioned to inspect the message before the recipient does, and the operator usually has no mail-security stack to call.
+A student receives a message from ``Handshake Security Team'' saying that unusual login activity was detected and that the account will be suspended unless they verify their identity at a link within 24 hours. A job seeker is told they have been selected, with no interview, for a \$45-per-hour remote data-entry role and should continue the conversation on Telegram. Both arrive through the platform's own inbox or an address it exposed, not through a corporate mail server with a secure email gateway in front of it. The platform operator is the only party positioned to inspect the message before the recipient does, and usually has no mail-security stack to call.
 
 The U.S.\ Federal Bureau of Investigation's Internet Crime Complaint Center reported employment-scam losses of roughly \$264 million in 2024, more than triple the 2023 figure~\cite{ic3_2024}. \todo{verify the figure against the primary IC3 PDF before submission; it was taken from secondary summaries.} Existing open-source defences, however, operate at the wrong level for this setting. Domain-permutation tools such as dnstwist~\cite{dnstwist} and confusable detectors such as \code{confusable\_homoglyphs}~\cite{confusablehomoglyphs} judge a registered domain, not a message. Fake-job-posting classifiers~\cite{vidros2017recruitment} judge a public listing, not a direct message to one recipient. LLM phishing benchmarks~\cite{yang2025fraudr1,pajola2025ephishgen} are email-centric and assume a mail-gateway vantage point with headers and attachments.
 
@@ -47,10 +47,10 @@ The victim is a student or early-career job seeker on a consumer career platform
 
 \paragraph{Contributions.}
 \begin{enumerate}
-\item A four-layer, zero-runtime-dependency detector (Section~\ref{sec:system}) in which every layer returns the reasons for its score, so a platform's review queue can show \emph{why}.
+\item A four-layer, zero-runtime-dependency detector (Section~\ref{sec:system}) in which every layer returns the reasons for its score.
 \item A hardening recipe for using an LLM as an intent classifier on attacker-controlled text (Section~\ref{sec:l3}), implementing OWASP LLM01 guidance with an independent pre-filter, nonce-delimited untrusted input, schema validation, and fail-closed behaviour.
-\item A brand-parametric benchmark with ten adversarial variants and explicit metrics for injection hijack and per-layer contribution (Section~\ref{sec:bench}), with results for the rule backend (Section~\ref{sec:results}) and an ablation isolating the effect of confusable folding and de-obfuscation (Table~\ref{tab:ablation}).
-\item A candid account of what the benchmark cannot show (Section~\ref{sec:limits}): the seed corpus is in-sample for the rule baseline, it is small and English-only, and the LLM backend has not yet been run.
+\item A brand-parametric benchmark with ten adversarial variants and explicit metrics for injection hijack and per-layer contribution (Section~\ref{sec:bench}), with results for the rule backend and a local 8B-parameter LLM backend (Section~\ref{sec:results}), an out-of-sample paraphrase test, and an ablation isolating the effect of confusable folding and de-obfuscation (Table~\ref{tab:ablation}).
+\item A candid account of what the benchmark cannot show (Section~\ref{sec:limits}): the seed corpus is in-sample for the rule baseline, it is small and English-only, and the only LLM measured so far is a small local model.
 \end{enumerate}
 
 \section{Related work}
@@ -63,12 +63,12 @@ Gabrilovich and Gontmakher~\cite{gabrilovich2002homograph} introduced the homogr
 Vidros et al.~\cite{vidros2017recruitment} characterised online recruitment fraud and released a public corpus of 17{,}880 annotated job advertisements, on which most later fake-job classifiers are trained. That line of work classifies the \emph{posting}. The scams in our threat model are one-to-one messages that may never correspond to a posting, and whose tell is a request (fee, equipment purchase, check deposit, off-platform move, personal documents) rather than the listing's wording.
 
 \paragraph{LLM phishing benchmarks and prompt injection.}
-Fraud-R1~\cite{yang2025fraudr1} evaluates how well LLMs resist multi-round fraud and phishing \emph{inducements} aimed at the model itself. E-PhishGen~\cite{pajola2025ephishgen} generates privacy-preserving phishing \emph{email} corpora and shows that detectors trained on existing public sets perform much worse on new ones. Both are email-centric; our corpus is platform-message-centric and brand-parametric. Greshake et al.~\cite{greshake2023indirect} showed that content an LLM-integrated application reads can hijack it, which OWASP lists as the top LLM application risk (LLM01)~\cite{owasp_llm01}. A message classifier is a textbook instance: the text it classifies is written by the adversary. Section~\ref{sec:l3} describes our mitigations and Section~\ref{sec:bench} the metric (hijack rate) that measures them.
+Fraud-R1~\cite{yang2025fraudr1} evaluates how well LLMs resist multi-round fraud and phishing \emph{inducements} aimed at the model itself; E-PhishGen~\cite{pajola2025ephishgen} generates privacy-preserving phishing \emph{email} corpora and shows that detectors trained on existing public sets degrade on new ones. Both are email-centric; our corpus is platform-message-centric and brand-parametric. Greshake et al.~\cite{greshake2023indirect} showed that content an LLM-integrated application reads can hijack it, which OWASP lists as the top LLM application risk (LLM01)~\cite{owasp_llm01}. A message classifier is a textbook instance: the text it classifies is written by the adversary. Section~\ref{sec:l3} describes our mitigations and Section~\ref{sec:bench} the metric (hijack rate) that measures them.
 
 \section{System}
 \label{sec:system}
 
-The detector is a Python package, \code{impersonation-detector} v0.1.0~\cite{ezema2026detector}, with no runtime dependencies; an LLM backend is optional. It is instantiated with a list of protected names, e.g.\ \code{["handshake.com", "Handshake", "Handshake Support"]}, and analyses one \code{Message} (body, sender display name, sender address, subject, links) into a \code{Verdict}: a risk in $[0,1]$, an action in \{allow, warn, hold, block\}, and a list of human-readable reasons. The seed corpus and all examples in this paper are instantiated with Handshake as the protected brand because that is the platform the author knows; every command takes \code{-p} names and nothing in the code is specific to it.
+\sloppypar The detector is a Python package, \code{impersonation-detector} v0.2.0~\cite{ezema2026detector}, with no runtime dependencies; an LLM backend is optional. It is instantiated with a list of protected names, e.g.\ \code{["handshake.com",} \code{"Handshake", "Handshake Support"]}, and analyses one \code{Message} (body, sender display name, sender address, subject, links) into a \code{Verdict}: a risk in $[0,1]$, an action in \{allow, warn, hold, block\}, and a list of human-readable reasons. The seed corpus and all examples here are instantiated with Handshake as the protected brand; every command takes \code{-p} names and nothing in the code is specific to it.
 
 \subsection{Layer 1: deterministic lookalike checks}
 \label{sec:l1}
@@ -125,12 +125,12 @@ local\_brand\_lookalike & $0.00$ \\
 \end{tabular}
 \end{table}
 
-\paragraph{Training.} A seeded synthetic generator produces labelled senders for a protected set: fourteen positive techniques (homoglyph, typo, TLD swap, affix and prefix domains, brand domain as a subdomain of an attacker host, leet, free-mail with brand display name, brand display name on an unrelated attacker domain, punycode, homoglyph display name, invisible characters, brand token in the local part) and eleven negative families that deliberately share surface features: the genuine brand, other companies with role words in the display name, people on free-mail, university offices (``Career Services'' on \code{.edu}) and students. We generate 800 examples (half positive) for each of eight protected sets (a career platform, a payments company, a software vendor, an exchange, two job boards, a bank, a file-sharing service), shuffle, and hold out 20\%. Plain gradient descent with an $L_2$ penalty ($10^{-4}$), learning rate 1.0, 600 epochs, in pure Python, takes about three seconds. On the 1{,}280-example holdout: precision 0.995, recall 0.991, $F_1$ 0.993, AUC 0.998. The weakest techniques are leet domains (0.867 accuracy) and university offices (0.955); every other technique scores 1.0. The learned weights are interpretable: a brand token in the local part of an address on a non-brand domain (\code{handshake.support@gmail.com}) is the single strongest signal, and role words in a display name are mildly \emph{negative}, because on their own they describe ``Career Services'' at a university as readily as an impostor.
+\paragraph{Training.} A seeded synthetic generator produces labelled senders for a protected set: fourteen positive techniques (homoglyph, typo, TLD swap, affix and prefix domains, brand domain as a subdomain of an attacker host, leet, free-mail with brand display name, brand display name on an unrelated attacker domain, punycode, homoglyph display name, invisible characters, brand token in the local part) and eleven negative families that share surface features: the genuine brand, other companies with role words in the display name, people on free-mail, university offices and students. We generate 800 examples (half positive) for each of eight protected sets (a career platform, a payments company, a software vendor, an exchange, two job boards, a bank, a file-sharing service), shuffle, and hold out 20\%. Plain gradient descent with an $L_2$ penalty ($10^{-4}$), learning rate 1.0, 600 epochs, in pure Python, takes about three seconds. On the 1{,}280-example holdout: precision 0.995, recall 0.991, $F_1$ 0.993, AUC 0.998. The weakest techniques are leet domains (0.867 accuracy) and university offices (0.955); every other technique scores 1.0. The learned weights are interpretable: a brand token in the local part of an address on a non-brand domain (\code{handshake.support@gmail.com}) is the single strongest signal, and role words in a display name are mildly \emph{negative}, because on their own they describe ``Career Services'' at a university as readily as an impostor.
 
 \subsection{Layer 3: message intent}
 \label{sec:l3}
 
-Layer~3 labels a message \code{benign}, \code{support\_impersonation}, \code{recruiter\_scam}, \code{credential\_phish}, or \code{payment\_redirect}, with a confidence and the subset of thirteen named signals it observed (urgency, credential request, payment request, off-platform move, personal-data request, too-good-to-be-true, authority claim, link or attachment, threat or consequence, secrecy, injection attempt, invisible characters, homoglyph characters). Two classifiers share this interface.
+Layer~3 gives a message one of five labels (\code{benign}, \code{support\_impersonation}, \code{recruiter\_scam}, \code{credential\_phish}, \code{payment\_redirect}) with a confidence and the subset of thirteen named signals it observed (urgency, credential request, payment request, off-platform move, personal-data request, too-good-to-be-true, authority claim, link or attachment, threat or consequence, secrecy, injection attempt, invisible characters, homoglyph characters). Two classifiers share this interface.
 
 \paragraph{Normalisation.} Both first normalise the text: NFKC; removal of zero-width, joiner, bidi-isolate, tag, and C0/C1 control characters; \emph{confusable folding}, which replaces every non-ASCII character whose UTS~\#39 prototype is a single ASCII letter with that letter (Cyrillic \cp{0430} $\to$ \code{a}) while leaving ASCII untouched so that \code{rn} stays \code{rn}; and a 6{,}000-character cap. The rule classifier then unions cues over three \emph{views} of the text: as normalised, de-leeted (\code{p4ssw0rd} $\to$ \code{password}), and de-spaced (\code{p a s s w o r d} $\to$ \code{password}).
 
@@ -143,54 +143,34 @@ Layer~3 labels a message \code{benign}, \code{support\_impersonation}, \code{rec
 \item \textbf{Schema validation.} The first JSON object in the reply is parsed; the label must be one of the five, the confidence is clipped to $[0,1]$, unknown signals are dropped, the rationale is truncated. One retry asks for JSON only.
 \item \textbf{Fail closed.} An unparseable reply, or a backend error, yields the label \code{unknown} with risk 0.5, never \code{benign}.
 \item \textbf{Overrule a hijacked ``benign''.} If the pre-filter saw an injection and the model answered \code{benign}, the result becomes \code{unknown}: the model may have obeyed the message.
+\item \textbf{Do not let the model raise its own floor.} The model's own \code{injection\_attempt} claim is discarded; only the pre-filter can assert that signal, because the pipeline raises a risk floor on it and a model that could set it could be talked into setting it.
 \end{enumerate}
 The rule baseline has no instruction channel and therefore cannot be hijacked at all, which is one reason both ship.
 
 \subsection{Pipeline}
 \label{sec:pipeline}
 
-Risk is a noisy-OR over the independent evidence, $r = 1-\prod_i(1-r_i)$ over the sender probability, the probability of the worst link host, and the intent risk (the confidence for a malicious label, 0.5 for \code{unknown}, 0 for \code{benign}), then raised to a floor of 0.85 for any Layer~1 hit and 0.60 for an injection attempt. Actions are thresholds on risk: warn at 0.30, hold at 0.60, block at 0.85, all configurable. A \code{Middleware} helper wraps a platform's send function so that blocked messages are dropped, held messages are delivered with the verdict attached for review, and warned messages are delivered. Median end-to-end latency on the benchmark is 0.73\,ms per message with the rule backend (Table~\ref{tab:perclass}).
+Risk is a noisy-OR over the independent evidence, $r = 1-\prod_i(1-r_i)$ over the sender probability, the probability of the worst link host, and the intent risk (the confidence for a malicious label, 0.5 for \code{unknown}, 0 for \code{benign}), then raised to a floor of 0.85 for any Layer~1 hit and 0.60 for an injection attempt. Actions are thresholds on risk: warn at 0.30, hold at 0.60, block at 0.85, all configurable. A \code{Middleware} helper wraps a platform's send function: blocked messages are dropped, held ones delivered with the verdict attached for review. Median end-to-end latency on the benchmark is 0.67\,ms per message with the rule backend (Table~\ref{tab:perclass}); an uncached 8B-parameter local model adds about two seconds (Section~\ref{sec:llm}).
 
 \section{Benchmark design}
 \label{sec:bench}
 
 \paragraph{Seed corpus.} The corpus has 76 hand-written messages: 30 benign, 14 support impersonation, 14 recruiter scam, 10 credential phish, 8 payment redirect (46 malicious). It is \emph{brand-parametric}: \code{\{brand\}}, \code{\{domain\}}, and \code{\{brand\_lower\}} are filled from the protected set at load time, so the same corpus tests any platform. Each example is one the author can defend as realistic, and no example is taken from a real victim report. The benign side is adversarial by design: 26 of 30 benign messages carry a tag naming a surface cue they share with attacks (salary figures, links, deadlines, role words, account and login language, ``background check'', ``verify'', ``bank details''), including genuine support replies from the protected domain, a genuine password-changed notification, a genuine trust-and-safety notice about a removed fraudulent posting, and a real employer's reminder never to send bank details by email. Three malicious messages (\code{s06}, \code{s11}, \code{c04}) carry a \emph{spoofed From} on the protected domain itself, so the sender gives no evidence and only the request can be judged. Fifteen of the 46 malicious messages come from free-mail addresses; 21 contain a link, as do 5 benign messages.
 
-\paragraph{Variants.} Each seed message is passed through ten deterministic, label-preserving transforms (Table~\ref{tab:variants}), seeded per (variant, message) so runs are reproducible. Six apply to every message; four make sense only for attacks and are scored on recall alone. The body-level transforms act on a fixed list of 30 cue words (\emph{verify}, \emph{password}, \emph{telegram}, \emph{gift}, \emph{fee}, \ldots) and on brand mentions; \emph{synonym} applies 23 fixed rewrite rules; \emph{injection} appends one of three payloads (a bracketed ``note to automated review systems'', a fake \code{SYSTEM:} line with a target JSON object, and a chat-template \code{<|im\_start|>system} block).
+\paragraph{Variants.} Each seed message is passed through ten deterministic, label-preserving transforms, seeded per (variant, message) so runs are reproducible. Six apply to every message: \emph{clean}; \emph{homoglyph} (one confusable glyph in each cue word and brand mention in the body); \emph{zero\_width} (a zero-width space inside each); \emph{leet} (digit substitutions); \emph{spaced} (cue words letter-spaced); and \emph{synonym}. Four make sense only for attacks and are scored on recall alone: \emph{injection}; \emph{link\_homoglyph} (one confusable glyph in each link host); \emph{link\_subdomain} (the brand's domain embedded as a subdomain of the attacker's host); and \emph{sender\_homoglyph} (the sending domain is a confusable of the brand's domain). The body-level transforms act on a fixed list of 30 cue words (\emph{verify}, \emph{password}, \emph{telegram}, \emph{gift}, \emph{fee}, \ldots) and on brand mentions; \emph{synonym} applies 23 fixed rewrite rules; \emph{injection} appends one of three payloads (a bracketed ``note to automated review systems'', a fake \code{SYSTEM:} line with a target JSON object, and a chat-template \code{<|im\_start|>system} block).
 
-\begin{table}[t]
-\centering\small
-\caption{Adversarial variants. ``M'' = applied to malicious messages only (recall reported, no FPR).}
-\label{tab:variants}
-\footnotesize\setlength{\tabcolsep}{3pt}
-\begin{tabular}{@{}lcp{4.3cm}@{}}
-\toprule
-Variant & & Transform \\
-\midrule
-clean & & unmodified seed message \\
-homoglyph & & one confusable glyph in cue words and brand mentions in the body \\
-zero\_width & & zero-width space inside cue words and brand mentions \\
-leet & & digit substitutions in cue words \\
-spaced & & cue words letter-spaced \\
-synonym & & cue words paraphrased from a fixed dictionary \\
-injection & M & prompt-injection text appended to the body \\
-link\_homoglyph & M & one confusable glyph in each link host \\
-link\_subdomain & M & brand domain embedded as a subdomain of the attacker's host \\
-sender\_homoglyph & M & sender domain is a confusable of the brand's domain \\
-\bottomrule
-\end{tabular}
-\end{table}
 
 \paragraph{Configurations and metrics.} Five layer configurations are run: L1, L2, L3, L1+L2, and L1+L2+L3. A message is \emph{flagged} by L1 if any lookalike matches; by L2 if the sender or any link scores $\geq 0.5$; by L3 if the label is malicious or \code{unknown}; and by a combined configuration if the pipeline action is not \code{allow}. For every configuration and variant we report precision, recall, $F_1$, false-positive rate (on the 30 benign messages), per-class recall, the number of \code{unknown} verdicts, the \emph{hijack} count, and median latency. Hijack counts, for the injection variant, the malicious messages that the configuration labelled malicious on the clean text but \code{benign} with the injection appended: an injection that flips a detection, not a message the classifier never caught. Reports are written as JSON and Markdown by \code{impersonation-detector bench}.
 
-\section{Results (rule backend)}
+\section{Results}
 \label{sec:results}
 
-Table~\ref{tab:main} gives recall and FPR for every configuration and variant, and Table~\ref{tab:perclass} per-class recall on the clean corpus, hijack counts, and latency. All numbers are from \code{benchmarks/benchmark\_rule.json}, generated on an Apple-silicon laptop under Python 3.12.
+\subsection{Rule backend}
+Table~\ref{tab:main} gives recall and FPR for every configuration and variant, and Table~\ref{tab:perclass} per-class recall on the clean corpus, hijack counts, and latency. All numbers are from \code{benchmarks/benchmark\_rule.json} (v0.2.0), generated on an Apple-silicon laptop under Python 3.12.
 
 \begin{table*}[t]
 \centering\small
-\caption{Recall / false-positive rate by layer configuration and variant, rule backend, v0.1.0. 46 malicious and 30 benign messages. Malicious-only variants report recall alone.}
+\caption{Recall / false-positive rate by layer configuration and variant, rule backend, v0.2.0. 46 malicious and 30 benign messages. Malicious-only variants report recall alone.}
 \label{tab:main}
 \footnotesize\setlength{\tabcolsep}{3.5pt}
 \begin{tabular}{@{}lcccccccccc@{}}
@@ -215,26 +195,26 @@ L1+L2+L3 & \textbf{1.00 / 0.00} & 0.98 / 0.03 & 1.00 / 0.03 & 0.94 / 0.00 & 1.00
 \toprule
 Config & cred. & pay. & recr. & supp. & hijack & unk. & ms \\
 \midrule
-L1       & 0.20 & 0.00 & 0.00 & 0.00 & 0 & 0 & 0.27 \\
-L2       & 0.20 & 0.12 & 0.00 & 0.71 & 0 & 0 & 0.12 \\
-L3       & 1.00 & 1.00 & 1.00 & 0.93 & 0 & 0 & 0.32 \\
-L1+L2    & 0.20 & 0.12 & 0.00 & 0.71 & 0 & 0 & 0.38 \\
-L1+L2+L3 & 1.00 & 1.00 & 1.00 & 1.00 & 0 & 0 & 0.73 \\
+L1       & 0.20 & 0.00 & 0.00 & 0.00 & 0 & 0 & 0.25 \\
+L2       & 0.20 & 0.12 & 0.00 & 0.71 & 0 & 0 & 0.11 \\
+L3       & 1.00 & 1.00 & 1.00 & 0.93 & 0 & 0 & 0.29 \\
+L1+L2    & 0.20 & 0.12 & 0.00 & 0.71 & 0 & 0 & 0.34 \\
+L1+L2+L3 & 1.00 & 1.00 & 1.00 & 1.00 & 0 & 0 & 0.67 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\paragraph{Layers are complementary.} Layers 1 and 2 know only the protected names, so their recall on scams that never mention the brand (every recruiter scam, most payment redirects) is near zero by construction; their job is the sender and the links. Layer~2 alone catches 71\% of support impersonation on the clean corpus from the sender line alone, and rises to 0.50 and 0.52 recall overall when attackers put a confusable or the brand's domain into their link host, because those link features are exactly what it was trained on. Layer~3 alone reaches 0.98 recall on the clean corpus; its one miss (\code{s12}, a soft ``verify to keep your profile visible'' nudge with no explicit threat) is caught in the full pipeline by Layer~2, which flags the sender \code{team@handshake-official.com} for a brand affix. The combined pipeline is the only configuration that reaches 1.00 recall at 0.00 FPR on the clean corpus and stays at or above 0.94 recall on every variant.
+\paragraph{Layers are complementary.} Layers 1 and 2 know only the protected names, so their recall on scams that never mention the brand (every recruiter scam, most payment redirects) is near zero by construction; their job is the sender and the links. Layer~2 alone catches 71\% of support impersonation on the clean corpus from the sender line alone, and rises to 0.50 and 0.52 recall overall when attackers put a confusable or the brand's domain into their link host. Layer~3 alone reaches 0.98 recall on the clean corpus; its one miss (\code{s12}, a soft ``verify to keep your profile visible'' nudge with no explicit threat) is caught in the full pipeline by Layer~2, which flags the sender \code{team@handshake-official.com} for a brand affix. The combined pipeline is the only configuration that reaches 1.00 recall at 0.00 FPR on the clean corpus and stays at or above 0.94 recall on every variant.
 
-\paragraph{Obfuscation hurts the rule baseline where it has no de-obfuscation.} Leet substitution and synonym rewriting are the two variants that cost the full pipeline recall (0.94 each). The three messages missed under both (\code{c03}, a ``shared document'' credential phish from a generic portal domain; \code{c07}, an interview link whose host embeds a benign company's domain in an attacker's; \code{p02}, a gift-card ``urgent favor'' from a personal free-mail address) have no brand lookalike in the sender or link for Layers~1--2 to seize on, so once the cue words are rewritten nothing is left. These are precisely the cases an LLM backend is expected to recover, and Table~\ref{tab:llm} is reserved for that measurement.
+\paragraph{Obfuscation hurts the rule baseline where it has no de-obfuscation.} Leet substitution and synonym rewriting are the two variants that cost the full pipeline recall (0.94 each). The three messages missed under both (\code{c03}, a ``shared document'' credential phish from a generic portal domain; \code{c07}, an interview link whose host embeds a benign company's domain in an attacker's; \code{p02}, a gift-card ``urgent favor'' from a personal free-mail address) have no brand lookalike in the sender or link for Layers~1--2 to seize on, so once the cue words are rewritten nothing is left. These are the cases an LLM backend recovers (Section~\ref{sec:llm}).
 
-\paragraph{Injection.} With the rule backend, the hijack count is 0 of 46 and no verdict is \code{unknown}; the pre-filter also recognises all three payloads, which raises the risk floor to 0.60 and contributes to the 1.00 recall under injection in the full pipeline. This row is a floor, not a result: it demonstrates that the metric works and that the rule path has no instruction channel. The interesting hijack numbers are the LLM backend's.
+\paragraph{Injection.} With the rule backend, the hijack count is 0 of 46 and no verdict is \code{unknown}; the pre-filter also recognises all three payloads, which raises the risk floor to 0.60 and contributes to the 1.00 recall under injection in the full pipeline. This row is a floor, not a result: the rule path has no instruction channel. The interesting hijack numbers are the LLM backend's (Section~\ref{sec:llm}).
 
 \paragraph{Finding 1: UTS~\#39 skeletons leave gaps a mixed-script check closes.}
 Consider the sending domain \code{h\textit{a}nds\textit{h}a\textit{k}e.com}, in which the italicised letters are Cyrillic \cp{0430}, Cyrillic \cp{04BB}, and Greek \cp{03BA}. In \code{confusables.txt} the prototype of \cp{0430} is ASCII \code{a} and that of \cp{04BB} is ASCII \code{h}, but the prototype of Greek small kappa is \cp{0138} \textsc{latin small letter kra} and the prototype of Cyrillic small te (\cp{0442}) is \cp{1D1B} \textsc{latin letter small capital t}: Latin, but not ASCII. The skeleton of the candidate is therefore \code{handsha}$\langle$\cp{0138}$\rangle$\code{e.corn}, not \code{handshake.corn}, and a detector that relies on skeleton equality alone---the natural reading of UTS~\#39 \S4---does not fire. Our Layer~1 still matches, via edit distance 1 between skeletons plus the mixed-script reason (Cyrillic+Greek+Latin), and Layer~2 scores the sender at probability 1.00 from \code{domain\_close\_typo}, \code{domain\_mixed\_script}, and \code{display\_claims\_brand\_off\_domain}. The same effect is why confusable folding in Layer~3 is defined as ``prototype is a single ASCII letter'': for \cp{03BA} it is not, and the glyph stays unfolded.
 
 \paragraph{Finding 2: regex cues die on one swapped glyph unless the text is folded first.}
-Table~\ref{tab:ablation} re-runs the L3 configuration with confusable folding disabled, with the leet and de-spacing views disabled, and with both disabled (\code{paper/ablation.py}, output in \code{paper/ablation.json}). Without folding, a single confusable glyph in each cue word drops recall from 0.978 (clean) to 0.609, a loss of 37 points; with folding the loss is 2 points (0.957). The corresponding de-obfuscation views move leet recall from 0.674 to 0.826 and letter-spaced recall from 0.696 to 0.978. FPR is 0.00 in every ablated cell, so the folding costs no precision on this corpus. The lesson generalises beyond this baseline: any cue- or token-based classifier, including an LLM's tokenizer, sees a different string after a confusable swap, and normalisation belongs in front of the classifier rather than inside it.
+Table~\ref{tab:ablation} re-runs the L3 configuration with confusable folding disabled, with the leet and de-spacing views disabled, and with both disabled (\code{paper/ablation.py}, output in \code{paper/ablation.json}). Without folding, a single confusable glyph in each cue word drops recall from 0.978 (clean) to 0.609, a loss of 37 points; with folding the loss is 2 points (0.957). The corresponding de-obfuscation views move leet recall from 0.674 to 0.826 and letter-spaced recall from 0.696 to 0.978. FPR is 0.00 in every ablated cell, so the folding costs no precision on this corpus. The lesson generalises: any cue- or token-based classifier sees a different string after a confusable swap, so normalisation belongs in front of the classifier.
 
 \begin{table}[t]
 \centering\small
@@ -254,43 +234,75 @@ neither            & 0.978 & 0.609 & 0.978 & 0.674 & 0.696 & 0.891 \\
 \end{table}
 
 \paragraph{Finding 3: negation must be handled at the clause level.}
-Benign message \code{b26} is a real employer's onboarding note: HR will send a secure link from the payroll provider to enter direct-deposit details, and ``Never send bank details by email.'' The phrase \emph{bank details} is a payment-request cue; the message also contains a link word and a role word, which is enough context for the rule classifier to label it \code{payment\_redirect} if the cue fires. With the negation window it is \code{benign} with no signals; deleting the word \emph{never} from the same message yields \code{payment\_redirect}. Because the window is bounded to the clause, ``Don't worry, just send the fee by Zelle'' does not escape: the comma ends the negation's scope. The rule contributes to the 0.00 FPR in every all-message variant in Table~\ref{tab:main}.
+Benign message \code{b26} is a real employer's onboarding note: HR will send a secure link from the payroll provider to enter direct-deposit details, and ``Never send bank details by email.'' The phrase \emph{bank details} is a payment-request cue; the message also contains a link word and a role word, which is enough context for the rule classifier to label it \code{payment\_redirect} if the cue fires. With the negation window it is \code{benign} with no signals; deleting the word \emph{never} from the same message yields \code{payment\_redirect}. Because the window is bounded to the clause, ``Don't worry, just send the fee by Zelle'' does not escape: the comma ends the negation's scope.
 
 \paragraph{The two false positives are variant artefacts.}
-The only non-zero FPR cells (0.03, one message of 30) arise in the homoglyph and zero-width variants, and both are benign messages from the platform itself that contain the platform's own link. The homoglyph transform rewrites \code{https://handshake.com/safety} in \code{b16} to a host with Greek kappa, and the zero-width transform splits \code{handshake.com} in \code{b15}; Layers~1 and~2 then flag a link that is, after mutation, genuinely a lookalike of the protected domain. The label is preserved by construction but the message is no longer the one a real platform would send, so we report the cells as measured and discuss the design choice in Section~\ref{sec:limits}.
+The only non-zero FPR cells (0.03, one message of 30) arise in the homoglyph and zero-width variants, and both are benign messages from the platform itself that contain the platform's own link. The homoglyph transform rewrites \code{https://handshake.com/safety} in \code{b16} to a host with Greek kappa, and the zero-width transform splits \code{handshake.com} in \code{b15}; Layers~1 and~2 then flag a link that is, after mutation, genuinely a lookalike of the protected domain. The label is preserved by construction but the message is no longer one a real platform would send; we report the cells as measured, and a future revision should exempt links to protected domains from benign-side mutation.
 
-\paragraph{LLM backend.} Table~\ref{tab:llm} is the placeholder for the LLM-backed Layer~3, which has not been run at the time of this draft. The benchmark command accepts \code{--backend ollama|openai|anthropic} and writes a report with the same schema, so the table is a drop-in. The quantities of interest are the hijack and \code{unknown} counts under the injection variant with and without the pre-filter overrule, recall on the leet and synonym variants where the rule baseline loses ground, and the out-of-sample paraphrase recall described in Section~\ref{sec:limits}.
+\subsection{Out-of-sample: a paraphrased corpus}
+\label{sec:oos}
+
+The seed corpus is the development set for the rule baseline, so the clean-corpus rows above are in-sample. For an out-of-sample test, \code{impersonation-detector paraphrase} had Llama~3.1~8B rewrite all 76 messages with the same purpose, requests, URLs, amounts, and names but different wording, and \code{bench --only-extra} scored the 76 rewrites alone (Table~\ref{tab:oos}; \code{benchmarks/oos\_rule/} and \code{oos\_llama/}). Layer~3 with the rule backend falls from 0.978 in-sample to 0.870 on the rewrites, still at FPR 0.00; most of the loss is on support impersonation (0.714), where the cue lists are the most wording-specific. The sender layers win most of it back: the full pipeline reaches 0.957 at FPR 0.00, with support-impersonation recall back to 1.00, because a rewritten support-impersonation message still arrives from a free-mail address with the brand in its display name. The two messages the full pipeline misses are \code{r05} (a ``confidential'' recruiter asking for date of birth and home address, rewritten so the request no longer matches a cue) and \code{c04} (a one-time-code request sent from a spoofed address on the protected domain, so there is no sender evidence at all).
+
+\begin{table}[t]
+\centering\small
+\caption{Out-of-sample: 76 Llama-paraphrased messages scored alone (recall / FPR and per-class recall). Both backends and both configurations.}
+\label{tab:oos}
+\footnotesize\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}llcccccc@{}}
+\toprule
+Backend & Config & R & FPR & cred. & pay. & recr. & supp. \\
+\midrule
+rule  & L3       & 0.870 & 0.00 & 0.90 & 1.00 & 0.93 & 0.71 \\
+rule  & L1+L2+L3 & 0.957 & 0.00 & 0.90 & 1.00 & 0.93 & 1.00 \\
+Llama 3.1 8B & L3       & 1.00 & 0.30 & 1.00 & 1.00 & 1.00 & 1.00 \\
+Llama 3.1 8B & L1+L2+L3 & 1.00 & 0.30 & 1.00 & 1.00 & 1.00 & 1.00 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{LLM backend: Llama 3.1 8B}
+\label{sec:llm}
+
+Table~\ref{tab:llm} reports the LLM-backed Layer~3 with Llama~3.1~8B served locally through Ollama (temperature 0, JSON mode), for the L3 and L1+L2+L3 configurations on every variant (\code{benchmarks/} \code{benchmark\_llm\_ollama\_llama3.1\_8b.json}); per-message verdicts, confidences, and rationales are in \code{dump\_llama3.1\_8b.jsonl}. Three things stand out.
 
 \begin{table*}[t]
 \centering\small
-\caption{\textbf{Placeholder.} LLM-backed Layer~3 and full pipeline. Not yet run (no local model or API key was available for this draft). To be filled from \code{benchmarks/benchmark\_<backend>.json}.}
+\caption{Recall / false-positive rate with the Llama~3.1~8B backend, v0.2.0, same corpus and variants as Table~\ref{tab:main}. ``unk.'' is the number of the 46 injected attacks the model called \code{benign} and the pre-filter overruled to \code{unknown}; hijack count is 0 in both rows.}
 \label{tab:llm}
-\begin{tabular}{@{}llcccc@{}}
+\footnotesize\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{@{}lccccccccccc@{}}
 \toprule
-Backend / model & Config & clean R/FPR & leet R & synonym R & hijack / unk. \\
+Config & clean & homoglyph & zero\_width & leet & spaced & synonym & inject. & link\_hg & link\_sub & sender\_hg & unk. \\
 \midrule
-\todo{ollama/llama3.1:8b} & L3 & -- & -- & -- & -- \\
- & L1+L2+L3 & -- & -- & -- & -- \\
-\todo{anthropic/claude-haiku-5-5} & L3 & -- & -- & -- & -- \\
- & L1+L2+L3 & -- & -- & -- & -- \\
+L3       & 1.00 / 0.33 & 1.00 / 0.30 & 1.00 / 0.30 & 1.00 / 0.43 & 1.00 / 0.37 & 1.00 / 0.33 & 1.00 & 1.00 & 1.00 & 1.00 & 5 \\
+L1+L2+L3 & 1.00 / 0.33 & 1.00 / 0.33 & 1.00 / 0.33 & 1.00 / 0.43 & 1.00 / 0.37 & 1.00 / 0.33 & 1.00 & 1.00 & 1.00 & 1.00 & 5 \\
 \bottomrule
 \end{tabular}
 \end{table*}
 
+\paragraph{Recall is perfect and robustness is free.} No obfuscation variant and no paraphrase moved the model off recall 1.00, in either configuration. The three messages the rule baseline loses under leet and synonym rewriting, and the two it loses on paraphrases, are all caught; the rules needed explicit folding and de-spacing to come close (Table~\ref{tab:ablation}), the model needed nothing.
+
+\paragraph{The false positives are the hard benign cases, and confidence does not separate them.} Ten of the 30 benign messages are flagged on the clean corpus: an offer letter with a salary (\code{b05}), a background-check notice (\code{b09}), a research-assistant posting asking for a CV (\code{b10}), the platform's own trust-and-safety notice about a removed fraudulent posting (\code{b16}), its genuine ``your password was changed'' notification (\code{b17}), a career-fair deadline (\code{b20}), a financial-aid verification request (\code{b23}), a professor asking for a resume (\code{b25}), the payroll onboarding note that says \emph{never} send bank details by email (\code{b26}), and an I-9/W-4 onboarding message (\code{b28}). The model's rationales invent cues that are not in the text: for \code{b17} it writes that the message ``requests the user to reset their password'' when the message says no action is needed, and for \code{b26} that it ``requests sensitive financial information'' when it says the opposite. Its confidence on these ten is 0.8--0.9; on the 46 real attacks it is 0.9--1.0. Sweeping a confidence threshold over the dump gives recall 1.00 at FPR 0.20 for thresholds of 0.85 or 0.90, and recall 0.41 at FPR 0.00 at 0.95: there is no operating point near the rule baseline's. A small model that is right about intent is not calibrated about it.
+
+\paragraph{The injection pre-filter earned its place.} Under the injection variant the model complied with the appended instruction and answered \code{benign} on 5 of the 46 attacks (\code{s05}, \code{c03}, \code{c04}, \code{c06}, \code{c10}). All five were overruled to \code{unknown}, and so held rather than delivered, because the deterministic pre-filter had already flagged the body. The hijack count in Table~\ref{tab:llm} is 0 only because of that overrule; without it the hijack rate would be 5/46. No message was \code{unknown} for any other reason (no parse failures), so the fail-closed path was exercised only by the overrule.
+
+\paragraph{Cost, and where this leaves Layer~3.} Uncached, the median latency per message was 2.1--2.3\,s on an Apple-silicon laptop (cells reading 0.02\,ms came from the response cache); the rule baseline is three to four orders of magnitude faster. The two backends sit at opposite corners: the rules at FPR 0.00 with recall that degrades under paraphrase, the 8B model at recall 1.00 with an FPR no consumer platform could ship. The pipeline's noisy-OR accepts either; the obvious next experiment is a larger or better-calibrated model, which the \code{--backend anthropic} and \code{--backend openai} paths run unchanged.
+
 \section{Limitations}
 \label{sec:limits}
 
-\paragraph{The clean-corpus numbers for the rule baseline are in-sample.} The seed corpus doubled as the development set for the rule classifier's cue lists, so Table~\ref{tab:main}'s L3 and L1+L2+L3 rows measure robustness to \emph{transformation} of known messages, not generalisation to unseen ones. The intended out-of-sample test ships with the package: \code{impersonation-detector paraphrase} asks a model the rules never saw to rewrite every seed message while preserving its purpose, and \code{bench --extra} scores the rewrites. Those numbers are not in this draft for the same reason the LLM backend's are not.
+\paragraph{The clean-corpus numbers for the rule baseline are in-sample.} The seed corpus doubled as the development set for the rule classifier's cue lists, so Table~\ref{tab:main}'s L3 and L1+L2+L3 rows measure robustness to \emph{transformation} of known messages, not generalisation to unseen ones. Section~\ref{sec:oos} is the out-of-sample test, with two caveats of its own: the paraphrases were produced by the same Llama~3.1~8B that is then evaluated on them, so the model's 1.00 recall there is not independent evidence; and a paraphrase preserves the request, so it tests wording, not novel scam scripts.
 
 \paragraph{The corpus is small and English-only.} Seventy-six messages give coarse resolution: one message is 2.2 points of recall and 3.3 points of FPR. The corpus is hand-written so that every example is defensible and no victim's message is reproduced, which bounds its size. Contributions of labelled real-world messages, with consent, are the obvious next step; the brand-parametric format is meant to make that possible without re-labelling.
 
-\paragraph{Variants mutate the brand's own links in benign messages.} As noted above, applying the homoglyph and zero-width transforms to a benign message that legitimately links to the protected domain produces a lookalike link. A future revision should exempt links to protected domains from benign-side mutation, or report those cells separately, since reasonable people can disagree about whether the flag is a false positive.
+\paragraph{Layer~2 is trained on a generator.} The generator encodes the impersonation techniques we know; a novel one needs a new named feature, which is why the feature list is explicit and the trainer is 150 lines. The 0.993 holdout $F_1$ should not be expected to transfer to wild senders.
 
-\paragraph{Layer~2 is trained on a generator.} The synthetic generator encodes the impersonation techniques we know. A novel technique needs a new named feature, which is the reason the feature list is explicit and the trainer is 150 lines; it is not a reason to expect the 0.993 holdout $F_1$ to transfer to wild senders.
+\paragraph{Protected names are a list, and homonyms exist.} An organisation with many brands supplies them all. A legitimately named business whose name contains the brand (``Firm Handshake Consulting'') scores as a lookalike; the right response is a product decision (warn and show the reason), not a detector change. The built-in public-suffix list is short: adequate for features, not for policy.
 
-\paragraph{Protected names are a list, and homonyms exist.} An organisation with many brands supplies them all. A legitimately named business whose name contains the brand (``Firm Handshake Consulting'') scores as a lookalike; the right response is a product decision (warn and show the reason) rather than a detector change. The built-in public-suffix list is short, which is adequate for feature extraction but not for policy.
+\paragraph{One small LLM.} The only model measured is an 8B-parameter local model at temperature~0. Its FPR and its 5-of-46 compliance with injections are not properties of LLM classifiers in general; the harness runs unchanged against hosted APIs.
 
-\paragraph{No LLM-backend numbers yet.} The hardening in Section~\ref{sec:l3} is implemented and unit-tested with a static backend (hijacked-benign overrule, fake-tag stripping, fail-closed parsing), but its benchmark behaviour with a real model, including how often the fail-closed path fires, is unmeasured.
+\paragraph{Beyond the message.} Version 0.2.0 of the package adds two modules outside this paper's scope that apply the same recipe to the domain an attacker registers and the account they take over: a lookalike-domain watch (13 permutation techniques, DNS/MX/RDAP evidence, Layer~2 scoring, and a blocklist the message detector applies as a 0.95 risk floor), and an account-takeover detector with a cross-account shared-IP signal. A live scan of \code{handshake.com} and \code{joinhandshake.com} on 2026-10-13 (\code{benchmarks/watch\_handshake.json}) returned 72 lookalike hits, 61 resolving and 38 with MX records, mostly TLD swaps (25) and single-character omissions (15); a live domain with MX is capable of abuse, not evidence of it.
 
 \section{Reproducibility}
 \label{sec:repro}
@@ -302,21 +314,26 @@ git clone https://github.com/sochimaezema-hs/\
 cd impersonation-detector
 python -m venv .venv && . .venv/bin/activate
 pip install -e ".[dev]"
-pytest -q                               # 48 tests
-python -m impersonation_detector.train  # Layer 2
+pytest -q                               # 65 tests
 impersonation-detector bench -p handshake.com \
-    -p Handshake -p "Handshake Support" \
-    --out benchmarks/
+    -p Handshake -p "Handshake Support" --out benchmarks/
 python paper/ablation.py                # ablation table
+impersonation-detector bench ... --backend ollama \
+    --model llama3.1:8b                 # Table 6
+impersonation-detector paraphrase ... --backend ollama \
+    --out benchmarks/paraphrase_llama3.1_8b.jsonl
+impersonation-detector bench ... --only-extra \
+    benchmarks/paraphrase_llama3.1_8b.jsonl   # Table 5
 \end{verbatim}}
-The LLM rows of Table~\ref{tab:llm} will come from the same \code{bench} command with \code{--backend ollama --model llama3.1:8b} or \code{--backend anthropic}, and the paraphrase test from \code{impersonation-detector paraphrase \ldots --out benchmarks/para.jsonl} followed by \code{bench \ldots --extra benchmarks/para.jsonl}. Layer~2 retraining is deterministic given \code{--seed}; benchmark variants are seeded per message. The package has no runtime dependencies and requires Python $\geq 3.10$. Unicode data files are redistributed under the Unicode License.
+The LLM runs need a local Ollama serving \code{llama3.1:8b}; a persistent per-message response cache (\code{benchmarks/cache\_llama3.1\_8b.jsonl}) preserves the exact responses behind Table~\ref{tab:llm}. Layer~2 retraining (\code{python -m impersonation\_detector.train}) is deterministic given \code{--seed}; variants are seeded per message. The package has no runtime dependencies and requires Python $\geq 3.10$. Unicode data files are redistributed under the Unicode License.
 
 \section{Ethics}
 \label{sec:ethics}
 
-No real victim data was used. Every message in the seed corpus was written by the author; sender names, companies, addresses, and domains are invented or drawn from a fixed fictional list, and the only real organisation named is the protected brand used as the corpus parameter. The synthetic sender generator produces addresses on fictional attacker domains and well-known free-mail providers; none was registered or sent to. The adversarial variants and injection payloads are the kind an attacker can already produce in seconds and are published so that defenders can measure against them, in line with the benchmarks we cite~\cite{yang2025fraudr1,pajola2025ephishgen}. The detector is explainable by design so that a platform deploying it can show a user or reviewer the reason for a hold rather than silently dropping a legitimate recruiter's message; the \emph{warn} and \emph{hold} actions exist for exactly that reason. The author is an engineer at the platform used as the example brand; this work was done independently, uses no platform data, and does not describe that platform's production defences.
+No real victim data was used. Every message in the seed corpus was written by the author; sender names, companies, addresses, and domains are invented or drawn from a fixed fictional list, and the only real organisation named is the protected brand used as the corpus parameter. No synthetic domain was registered or contacted. The adversarial variants and injection payloads are the kind an attacker can already produce in seconds and are published so that defenders can measure against them, in line with the benchmarks we cite~\cite{yang2025fraudr1,pajola2025ephishgen}. The detector is explainable by design so that a platform can show a user or reviewer the reason for a hold rather than silently dropping a legitimate recruiter's message. The author is an engineer at the platform used as the example brand; this work was done independently, uses no platform data, and does not describe that platform's production defences.
 
+{\footnotesize
 \bibliographystyle{plainnat}
-\bibliography{refs}
+\bibliography{refs}}
 
 \end{document}
