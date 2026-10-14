@@ -373,10 +373,11 @@ def _parse_output(text: str) -> dict | None:
 class LLMIntentClassifier:
     """Message-intent classification with a language model, hardened per OWASP LLM01."""
 
-    def __init__(self, backend: Backend, retries: int = 1) -> None:
+    def __init__(self, backend: Backend, retries: int = 1, cache: bool = True) -> None:
         self.backend = backend
         self.retries = retries
         self.name = f"llm:{backend.name}"
+        self._cache: dict[tuple, IntentResult] | None = {} if cache else None
 
     def build_prompt(self, msg: Message, nonce: str) -> tuple[str, str]:
         body = _normalize(msg.body)
@@ -395,6 +396,15 @@ class LLMIntentClassifier:
         return system, user
 
     def classify(self, msg: Message) -> IntentResult:
+        key = (msg.sender_name, msg.sender_address, msg.subject, msg.body, msg.links, msg.context)
+        if self._cache is not None and key in self._cache:
+            return self._cache[key]
+        result = self._classify(msg)
+        if self._cache is not None and result.label != UNKNOWN:
+            self._cache[key] = result
+        return result
+
+    def _classify(self, msg: Message) -> IntentResult:
         nonce = secrets.token_hex(4)
         system, user = self.build_prompt(msg, nonce)
         raw_all = f"{msg.subject}\n{msg.body}"
@@ -422,7 +432,10 @@ class LLMIntentClassifier:
             # Fail closed: an unparseable answer is never treated as benign.
             return IntentResult(UNKNOWN, 0.0, tuple(sorted(pre)), "unparseable model output", self.name, raw)
 
-        signals = set(parsed["signals"]) | pre
+        # The model's own "injection_attempt" claim is not trusted: only the deterministic
+        # pre-filter can assert it (the pipeline raises a risk floor on that signal).
+        model_signals = set(parsed["signals"]) - {"injection_attempt"}
+        signals = model_signals | pre
         label, conf = parsed["label"], parsed["confidence"]
         if "injection_attempt" in pre and label == "benign":
             # The pre-filter saw an injection the model may have obeyed. Do not trust "benign".

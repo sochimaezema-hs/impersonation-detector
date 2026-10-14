@@ -1,0 +1,1507 @@
+[
+  {
+    "domain": "yhandshake.com",
+    "technique": "insertion",
+    "source": "handshake.com",
+    "score": 0.9981,
+    "risk": 0.9825,
+    "action": "block",
+    "reasons": [
+      "L2 domain_brand_affix",
+      "L2 domain_close_typo",
+      "live: resolves, mx, registered",
+      "registered 36 days ago",
+      "can send mail"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "104.21.15.34",
+      "172.67.161.75"
+    ],
+    "res_has_mx": true,
+    "res_created": "2026-09-07T17:41:58Z",
+    "res_registrar": "HOSTINGER operations, UAB",
+    "res_error": null
+  },
+  {
+    "domain": "handshakee.com",
+    "technique": "repetition",
+    "source": "handshake.com",
+    "score": 0.9981,
+    "risk": 0.965,
+    "action": "block",
+    "reasons": [
+      "L2 domain_brand_affix",
+      "L2 domain_close_typo",
+      "live: resolves, mx, registered",
+      "can send mail"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "52.199.97.190",
+      "54.248.83.251",
+      "54.250.144.100"
+    ],
+    "res_has_mx": true,
+    "res_created": null,
+    "res_registrar": null,
+    "res_error": null
+  },
+  {
+    "domain": "handshakes.com",
+    "technique": "plural",
+    "source": "handshake.com",
+    "score": 0.9981,
+    "risk": 0.965,
+    "action": "block",
+    "reasons": [
+      "L2 domain_brand_affix",
+      "L2 domain_close_typo",
+      "live: resolves, mx, registered",
+      "can send mail"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "15.197.148.33",
+      "3.33.130.190"
+    ],
+    "res_has_mx": true,
+    "res_created": "1998-05-14T04:00:00Z",
+    "res_registrar": "GoDaddy.com, LLC",
+    "res_error": null
+  },
+  {
+    "domain": "joinnhandshake.com",
+    "technique": "repetition",
+    "source": "joinhandshake.com",
+    "score": 0.9981,
+    "risk": 0.965,
+    "action": "block",
+    "reasons": [
+      "L2 domain_brand_affix",
+      "L2 domain_close_typo",
+      "live: mx, registered",
+      "can send mail"
+    ],
+    "res_registered": true,
+    "res_addresses": [],
+    "res_has_mx": true,
+    "res_created": "2026-04-11T15:56:10Z",
+    "res_registrar": "Spaceship, Inc.",
+    "res_error": null
+  },
+  {
+    "domain": "jonhandshake.com",
+    "technique": "omission",
+    "source": "joinhandshake.com",
+    "score": 0.9981,
+    "risk": 0.965,
+    "action": "block",
+    "reasons": [
+      "L2 domain_brand_affix",
+      "L2 domain_close_typo",
+      "live: resolves, mx, registered",
+      "can send mail"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "15.197.204.56",
+      "3.33.243.145"
+    ],
+    "res_has_mx": true,
+    "res_created": "2017-12-07T02:19:53Z",
+    "res_registrar": "TuringSign Inc. d/b/a Cosmotown",
+    "res_error": null
+  },
+  {
+    "domain": "handsake.com",
+    "technique": "omission",
+    "source": "handshake.com",
+    "score": 0.8513,
+    "risk": 0.9628,
+    "action": "block",
+    "reasons": [
+      "L2 domain_close_typo",
+      "live: resolves, registered",
+      "registered 45 days ago"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "104.21.31.69",
+      "172.67.175.63"
+    ],
+    "res_has_mx": false,
+    "res_created": "2026-08-30T07:36:40Z",
+    "res_registrar": "Spaceship, Inc.",
+    "res_error": null
+  },
+  {
+    "domain": "handshake-team.com",
+    "technique": "affix",
+    "source": "handshake.com",
+    "score": 0.8871,
+    "risk": 0.9605,
+    "action": "block",
+    "reasons": [
+      "L2 domain_brand_affix",
+      "live: resolves, mx, registered",
+      "can send mail"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "81.223.232.90"
+    ],
+    "res_has_mx": true,
+    "res_created": "2026-03-16T14:59:18Z",
+    "res_registrar": "Hosting Concepts B.V. d/b/a Registrar.eu",
+    "res_error": null
+  },
+  {
+    "domain": "handshakejobs.com",
+    "technique": "affix",
+    "source": "handshake.com",
+    "score": 0.8871,
+    "risk": 0.9605,
+    "action": "block",
+    "reasons": [
+      "L2 domain_brand_affix",
+      "live: resolves, mx, registered",
+      "can send mail"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "15.197.225.128",
+      "3.33.251.168"
+    ],
+    "res_has_mx": true,
+    "res_created": "2000-04-01T01:39:03Z",
+    "res_registrar": "GoDaddy.com, LLC",
+    "res_error": null
+  },
+  {
+    "domain": "joinhandshakecareers.com",
+    "technique": "affix",
+    "source": "joinhandshake.com",
+    "score": 0.8871,
+    "risk": 0.9605,
+    "action": "block",
+    "reasons": [
+      "L2 domain_brand_affix",
+      "live: resolves, mx, registered",
+      "can send mail"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "91.195.240.123"
+    ],
+    "res_has_mx": true,
+    "res_created": "2026-03-18T14:13:21Z",
+    "res_registrar": "NameSilo, LLC",
+    "res_error": null
+  },
+  {
+    "domain": "ghandshake.com",
+    "technique": "insertion",
+    "source": "handshake.com",
+    "score": 0.9981,
+    "risk": 0.95,
+    "action": "block",
+    "reasons": [
+      "L2 domain_brand_affix",
+      "L2 domain_close_typo",
+      "live: resolves, registered"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "104.21.17.49",
+      "172.67.222.79"
+    ],
+    "res_has_mx": false,
+    "res_created": "2020-09-30T18:22:45Z",
+    "res_registrar": "NameCheap, Inc.",
+    "res_error": null
+  },
+  {
+    "domain": "joinghandshake.com",
+    "technique": "insertion",
+    "source": "joinhandshake.com",
+    "score": 0.9981,
+    "risk": 0.95,
+    "action": "block",
+    "reasons": [
+      "L2 domain_brand_affix",
+      "L2 domain_close_typo",
+      "live: registered"
+    ],
+    "res_registered": true,
+    "res_addresses": [],
+    "res_has_mx": false,
+    "res_created": "2018-10-05T21:03:00Z",
+    "res_registrar": "Media Elite Holdings Limited, S.A.",
+    "res_error": null
+  },
+  {
+    "domain": "joinhandshakes.com",
+    "technique": "plural",
+    "source": "joinhandshake.com",
+    "score": 0.9981,
+    "risk": 0.95,
+    "action": "block",
+    "reasons": [
+      "L2 domain_brand_affix",
+      "L2 domain_close_typo",
+      "live: resolves, registered"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "13.223.25.84",
+      "54.243.117.197"
+    ],
+    "res_has_mx": false,
+    "res_created": "2025-11-30T19:04:01Z",
+    "res_registrar": "DropCatch.com 379 LLC",
+    "res_error": null
+  },
+  {
+    "domain": "haandshake.com",
+    "technique": "repetition",
+    "source": "handshake.com",
+    "score": 0.8513,
+    "risk": 0.948,
+    "action": "block",
+    "reasons": [
+      "L2 domain_close_typo",
+      "live: resolves, mx, registered",
+      "can send mail"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "104.21.56.31",
+      "172.67.176.28"
+    ],
+    "res_has_mx": true,
+    "res_created": "2026-01-30T09:33:15Z",
+    "res_registrar": "NameCheap, Inc.",
+    "res_error": null
+  },
+  {
+    "domain": "hand-shake.com",
+    "technique": "hyphenation",
+    "source": "handshake.com",
+    "score": 0.8513,
+    "risk": 0.948,
+    "action": "block",
+    "reasons": [
+      "L2 domain_close_typo",
+      "live: resolves, mx, registered",
+      "can send mail"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "13.248.169.48",
+      "76.223.54.146"
+    ],
+    "res_has_mx": true,
+    "res_created": "2020-02-04T19:46:52Z",
+    "res_registrar": "Dynadot Inc",
+    "res_error": null
+  },
+  {
+    "domain": "handshaake.com",
+    "technique": "repetition",
+    "source": "handshake.com",
+    "score": 0.8513,
+    "risk": 0.948,
+    "action": "block",
+    "reasons": [
+      "L2 domain_close_typo",
+      "live: resolves, mx, registered",
+      "can send mail"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "216.198.79.65",
+      "64.29.17.65"
+    ],
+    "res_has_mx": true,
+    "res_created": "2026-03-05T14:16:50Z",
+    "res_registrar": "NameCheap, Inc.",
+    "res_error": null
+  },
+  {
+    "domain": "handshaek.com",
+    "technique": "transposition",
+    "source": "handshake.com",
+    "score": 0.8513,
+    "risk": 0.948,
+    "action": "block",
+    "reasons": [
+      "L2 domain_close_typo",
+      "live: mx, registered",
+      "can send mail"
+    ],
+    "res_registered": true,
+    "res_addresses": [],
+    "res_has_mx": true,
+    "res_created": "2025-04-27T13:16:48Z",
+    "res_registrar": "Cloudflare, Inc.",
+    "res_error": null
+  },
+  {
+    "domain": "handshaike.com",
+    "technique": "insertion",
+    "source": "handshake.com",
+    "score": 0.8513,
+    "risk": 0.948,
+    "action": "block",
+    "reasons": [
+      "L2 domain_close_typo",
+      "live: resolves, mx, registered",
+      "can send mail"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "15.197.204.56",
+      "3.33.243.145"
+    ],
+    "res_has_mx": true,
+    "res_created": "2019-02-26T19:49:15Z",
+    "res_registrar": "GoDaddy.com, LLC",
+    "res_error": null
+  },
+  {
+    "domain": "handshakr.com",
+    "technique": "replacement",
+    "source": "handshake.com",
+    "score": 0.8513,
+    "risk": 0.948,
+    "action": "block",
+    "reasons": [
+      "L2 domain_close_typo",
+      "live: resolves, mx, registered",
+      "can send mail"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "185.158.133.1"
+    ],
+    "res_has_mx": true,
+    "res_created": null,
+    "res_registrar": null,
+    "res_error": null
+  },
+  {
+    "domain": "handshke.com",
+    "technique": "omission",
+    "source": "handshake.com",
+    "score": 0.8513,
+    "risk": 0.948,
+    "action": "block",
+    "reasons": [
+      "L2 domain_close_typo",
+      "live: resolves, mx, registered",
+      "can send mail"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "217.160.0.13"
+    ],
+    "res_has_mx": true,
+    "res_created": "2015-12-16T11:27:49Z",
+    "res_registrar": "Cronon GmbH",
+    "res_error": null
+  },
+  {
+    "domain": "handzhake.com",
+    "technique": "replacement",
+    "source": "handshake.com",
+    "score": 0.8513,
+    "risk": 0.948,
+    "action": "block",
+    "reasons": [
+      "L2 domain_close_typo",
+      "live: resolves, mx, registered",
+      "can send mail"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "77.111.241.66"
+    ],
+    "res_has_mx": true,
+    "res_created": "2024-05-23T05:40:12Z",
+    "res_registrar": "One.com A/S",
+    "res_error": null
+  },
+  {
+    "domain": "hanshake.com",
+    "technique": "omission",
+    "source": "handshake.com",
+    "score": 0.8513,
+    "risk": 0.948,
+    "action": "block",
+    "reasons": [
+      "L2 domain_close_typo",
+      "live: resolves, mx, registered",
+      "can send mail"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "216.245.213.74"
+    ],
+    "res_has_mx": true,
+    "res_created": "2020-07-20T13:05:05Z",
+    "res_registrar": "Media Elite Holdings Limited, S.A.",
+    "res_error": null
+  },
+  {
+    "domain": "hendshake.com",
+    "technique": "vowel_swap",
+    "source": "handshake.com",
+    "score": 0.8513,
+    "risk": 0.948,
+    "action": "block",
+    "reasons": [
+      "L2 domain_close_typo",
+      "live: resolves, mx, registered",
+      "can send mail"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "13.32.230.110",
+      "13.32.230.39",
+      "13.32.230.56",
+      "13.32.230.60"
+    ],
+    "res_has_mx": true,
+    "res_created": "2022-08-18T05:20:52Z",
+    "res_registrar": "GoDaddy.com, LLC",
+    "res_error": null
+  },
+  {
+    "domain": "joinandshake.com",
+    "technique": "omission",
+    "source": "joinhandshake.com",
+    "score": 0.8513,
+    "risk": 0.948,
+    "action": "block",
+    "reasons": [
+      "L2 domain_close_typo",
+      "live: resolves, mx, registered",
+      "can send mail"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "15.197.204.56",
+      "3.33.243.145"
+    ],
+    "res_has_mx": true,
+    "res_created": null,
+    "res_registrar": null,
+    "res_error": null
+  },
+  {
+    "domain": "joinhadshake.com",
+    "technique": "omission",
+    "source": "joinhandshake.com",
+    "score": 0.8513,
+    "risk": 0.948,
+    "action": "block",
+    "reasons": [
+      "L2 domain_close_typo",
+      "live: resolves, mx, registered",
+      "can send mail"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "15.197.204.56",
+      "3.33.243.145"
+    ],
+    "res_has_mx": true,
+    "res_created": "2017-12-07T02:20:13Z",
+    "res_registrar": "TuringSign Inc. d/b/a Cosmotown",
+    "res_error": null
+  },
+  {
+    "domain": "joinhandhake.com",
+    "technique": "omission",
+    "source": "joinhandshake.com",
+    "score": 0.8513,
+    "risk": 0.948,
+    "action": "block",
+    "reasons": [
+      "L2 domain_close_typo",
+      "live: resolves, mx, registered",
+      "can send mail"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "15.197.204.56",
+      "3.33.243.145"
+    ],
+    "res_has_mx": true,
+    "res_created": "2017-12-07T02:20:30Z",
+    "res_registrar": "TuringSign Inc. d/b/a Cosmotown",
+    "res_error": null
+  },
+  {
+    "domain": "joinhandsake.com",
+    "technique": "omission",
+    "source": "joinhandshake.com",
+    "score": 0.8513,
+    "risk": 0.948,
+    "action": "block",
+    "reasons": [
+      "L2 domain_close_typo",
+      "live: resolves, mx, registered",
+      "can send mail"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "15.197.204.56",
+      "3.33.243.145"
+    ],
+    "res_has_mx": true,
+    "res_created": "2017-12-07T02:20:29Z",
+    "res_registrar": "TuringSign Inc. d/b/a Cosmotown",
+    "res_error": null
+  },
+  {
+    "domain": "joinhandshak.com",
+    "technique": "omission",
+    "source": "joinhandshake.com",
+    "score": 0.8513,
+    "risk": 0.948,
+    "action": "block",
+    "reasons": [
+      "L2 domain_close_typo",
+      "live: resolves, mx, registered",
+      "can send mail"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "15.197.204.56",
+      "3.33.243.145"
+    ],
+    "res_has_mx": true,
+    "res_created": "2017-08-23T07:16:31Z",
+    "res_registrar": "TuringSign Inc. d/b/a Cosmotown",
+    "res_error": null
+  },
+  {
+    "domain": "joinhandshke.com",
+    "technique": "omission",
+    "source": "joinhandshake.com",
+    "score": 0.8513,
+    "risk": 0.948,
+    "action": "block",
+    "reasons": [
+      "L2 domain_close_typo",
+      "live: resolves, mx, registered",
+      "can send mail"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "15.197.204.56",
+      "3.33.243.145"
+    ],
+    "res_has_mx": true,
+    "res_created": null,
+    "res_registrar": null,
+    "res_error": null
+  },
+  {
+    "domain": "joinhandsshake.com",
+    "technique": "repetition",
+    "source": "joinhandshake.com",
+    "score": 0.8513,
+    "risk": 0.948,
+    "action": "block",
+    "reasons": [
+      "L2 domain_close_typo",
+      "live: resolves, mx, registered",
+      "can send mail"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "15.197.204.56",
+      "3.33.243.145"
+    ],
+    "res_has_mx": true,
+    "res_created": "2018-08-20T05:54:54Z",
+    "res_registrar": "Spaceship, Inc.",
+    "res_error": null
+  },
+  {
+    "domain": "joinhanshake.com",
+    "technique": "omission",
+    "source": "joinhandshake.com",
+    "score": 0.8513,
+    "risk": 0.948,
+    "action": "block",
+    "reasons": [
+      "L2 domain_close_typo",
+      "live: resolves, mx, registered",
+      "can send mail"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "15.197.204.56",
+      "3.33.243.145"
+    ],
+    "res_has_mx": true,
+    "res_created": "2017-12-07T02:20:24Z",
+    "res_registrar": "TuringSign Inc. d/b/a Cosmotown",
+    "res_error": null
+  },
+  {
+    "domain": "app-joinhandshake.com",
+    "technique": "prefix",
+    "source": "joinhandshake.com",
+    "score": 0.8871,
+    "risk": 0.9435,
+    "action": "block",
+    "reasons": [
+      "L2 domain_brand_affix",
+      "live: resolves, registered"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "98.92.0.26"
+    ],
+    "res_has_mx": false,
+    "res_created": "2026-05-04T17:11:06Z",
+    "res_registrar": "GoDaddy.com, LLC",
+    "res_error": null
+  },
+  {
+    "domain": "gethandshake.com",
+    "technique": "prefix",
+    "source": "handshake.com",
+    "score": 0.8871,
+    "risk": 0.9435,
+    "action": "block",
+    "reasons": [
+      "L2 domain_brand_affix",
+      "live: registered"
+    ],
+    "res_registered": true,
+    "res_addresses": [],
+    "res_has_mx": false,
+    "res_created": "2017-05-13T06:11:43Z",
+    "res_registrar": "GoDaddy.com, LLC",
+    "res_error": null
+  },
+  {
+    "domain": "handshakecareers.com",
+    "technique": "affix",
+    "source": "handshake.com",
+    "score": 0.8871,
+    "risk": 0.9435,
+    "action": "block",
+    "reasons": [
+      "L2 domain_brand_affix",
+      "live: resolves, registered"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "13.223.25.84",
+      "54.243.117.197"
+    ],
+    "res_has_mx": false,
+    "res_created": "2026-01-05T19:35:04Z",
+    "res_registrar": "DropCatch.com 1284 LLC",
+    "res_error": null
+  },
+  {
+    "domain": "joinhandshake-hr.com",
+    "technique": "affix",
+    "source": "joinhandshake.com",
+    "score": 0.8871,
+    "risk": 0.9435,
+    "action": "block",
+    "reasons": [
+      "L2 domain_brand_affix",
+      "live: resolves, registered"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "34.203.246.190"
+    ],
+    "res_has_mx": false,
+    "res_created": "2026-05-04T17:11:16Z",
+    "res_registrar": "GoDaddy.com, LLC",
+    "res_error": null
+  },
+  {
+    "domain": "myhandshake.com",
+    "technique": "prefix",
+    "source": "handshake.com",
+    "score": 0.8871,
+    "risk": 0.9435,
+    "action": "block",
+    "reasons": [
+      "L2 domain_brand_affix",
+      "live: resolves, registered"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "38.180.86.73"
+    ],
+    "res_has_mx": false,
+    "res_created": "2003-03-04T21:14:47Z",
+    "res_registrar": "Moniker Online Services LLC",
+    "res_error": null
+  },
+  {
+    "domain": "thehandshake.com",
+    "technique": "prefix",
+    "source": "handshake.com",
+    "score": 0.8871,
+    "risk": 0.9435,
+    "action": "block",
+    "reasons": [
+      "L2 domain_brand_affix",
+      "live: resolves, registered"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "3.233.30.191"
+    ],
+    "res_has_mx": false,
+    "res_created": "1999-12-03T17:10:53Z",
+    "res_registrar": "GoDaddy.com, LLC",
+    "res_error": null
+  },
+  {
+    "domain": "handshake.app",
+    "technique": "tld_swap",
+    "source": "handshake.com",
+    "score": 0.8086,
+    "risk": 0.933,
+    "action": "block",
+    "reasons": [
+      "L2 domain_tld_swap",
+      "live: resolves, mx, registered",
+      "can send mail"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "104.21.95.27",
+      "172.67.169.76"
+    ],
+    "res_has_mx": true,
+    "res_created": "2023-07-21T13:30:45.390Z",
+    "res_registrar": "CloudFlare, Inc.",
+    "res_error": null
+  },
+  {
+    "domain": "handshake.cc",
+    "technique": "tld_swap",
+    "source": "handshake.com",
+    "score": 0.8086,
+    "risk": 0.933,
+    "action": "block",
+    "reasons": [
+      "L2 domain_tld_swap",
+      "live: resolves, mx, registered",
+      "can send mail"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "216.198.79.1",
+      "64.29.17.1"
+    ],
+    "res_has_mx": true,
+    "res_created": "2024-08-25T09:48:58Z",
+    "res_registrar": "Spaceship, Inc.",
+    "res_error": null
+  },
+  {
+    "domain": "handshake.co",
+    "technique": "tld_swap",
+    "source": "handshake.com",
+    "score": 0.8086,
+    "risk": 0.933,
+    "action": "block",
+    "reasons": [
+      "L2 domain_tld_swap",
+      "live: resolves, mx, registered",
+      "can send mail"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "104.154.117.89"
+    ],
+    "res_has_mx": true,
+    "res_created": null,
+    "res_registrar": null,
+    "res_error": null
+  },
+  {
+    "domain": "handshake.help",
+    "technique": "tld_swap",
+    "source": "handshake.com",
+    "score": 0.8086,
+    "risk": 0.933,
+    "action": "block",
+    "reasons": [
+      "L2 domain_tld_swap",
+      "live: resolves, mx, registered",
+      "can send mail"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "162.255.119.22"
+    ],
+    "res_has_mx": true,
+    "res_created": "2023-11-01T22:32:07.0Z",
+    "res_registrar": "NameCheap, Inc.",
+    "res_error": null
+  },
+  {
+    "domain": "handshake.info",
+    "technique": "tld_swap",
+    "source": "handshake.com",
+    "score": 0.8086,
+    "risk": 0.933,
+    "action": "block",
+    "reasons": [
+      "L2 domain_tld_swap",
+      "live: resolves, mx, registered",
+      "can send mail"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "13.248.169.48",
+      "76.223.54.146"
+    ],
+    "res_has_mx": true,
+    "res_created": "2005-03-03T10:57:22.826Z",
+    "res_registrar": "Dynadot Inc",
+    "res_error": null
+  },
+  {
+    "domain": "handshake.io",
+    "technique": "tld_swap",
+    "source": "handshake.com",
+    "score": 0.8086,
+    "risk": 0.933,
+    "action": "block",
+    "reasons": [
+      "L2 domain_tld_swap",
+      "live: resolves, mx, registered",
+      "can send mail"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "192.64.119.162"
+    ],
+    "res_has_mx": true,
+    "res_created": null,
+    "res_registrar": null,
+    "res_error": null
+  },
+  {
+    "domain": "handshake.online",
+    "technique": "tld_swap",
+    "source": "handshake.com",
+    "score": 0.8086,
+    "risk": 0.933,
+    "action": "block",
+    "reasons": [
+      "L2 domain_tld_swap",
+      "live: resolves, mx, registered",
+      "can send mail"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "77.111.243.70"
+    ],
+    "res_has_mx": true,
+    "res_created": "2024-09-12T00:06:43.000Z",
+    "res_registrar": "Hosting Concepts B.V. d/b/a Registrar.eu",
+    "res_error": null
+  },
+  {
+    "domain": "handshake.org",
+    "technique": "tld_swap",
+    "source": "handshake.com",
+    "score": 0.8086,
+    "risk": 0.933,
+    "action": "block",
+    "reasons": [
+      "L2 domain_tld_swap",
+      "live: resolves, mx, registered",
+      "can send mail"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "104.21.86.152",
+      "172.67.221.77"
+    ],
+    "res_has_mx": true,
+    "res_created": null,
+    "res_registrar": null,
+    "res_error": null
+  },
+  {
+    "domain": "handshake.xyz",
+    "technique": "tld_swap",
+    "source": "handshake.com",
+    "score": 0.8086,
+    "risk": 0.933,
+    "action": "block",
+    "reasons": [
+      "L2 domain_tld_swap",
+      "live: resolves, mx, registered",
+      "can send mail"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "13.248.169.48",
+      "76.223.54.146"
+    ],
+    "res_has_mx": true,
+    "res_created": "2020-06-21T02:20:30.0Z",
+    "res_registrar": "Dynadot Inc",
+    "res_error": null
+  },
+  {
+    "domain": "joinhandshake.app",
+    "technique": "tld_swap",
+    "source": "joinhandshake.com",
+    "score": 0.8086,
+    "risk": 0.933,
+    "action": "block",
+    "reasons": [
+      "L2 domain_tld_swap",
+      "live: resolves, mx, registered",
+      "can send mail"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "217.70.184.38"
+    ],
+    "res_has_mx": true,
+    "res_created": "2018-05-08T16:02:31.223Z",
+    "res_registrar": "Gandi SAS",
+    "res_error": null
+  },
+  {
+    "domain": "joinhandshake.co",
+    "technique": "tld_swap",
+    "source": "joinhandshake.com",
+    "score": 0.8086,
+    "risk": 0.933,
+    "action": "block",
+    "reasons": [
+      "L2 domain_tld_swap",
+      "live: resolves, mx",
+      "can send mail"
+    ],
+    "res_registered": false,
+    "res_addresses": [
+      "103.224.182.244"
+    ],
+    "res_has_mx": true,
+    "res_created": null,
+    "res_registrar": null,
+    "res_error": null
+  },
+  {
+    "domain": "joinhandshake.xyz",
+    "technique": "tld_swap",
+    "source": "joinhandshake.com",
+    "score": 0.8086,
+    "risk": 0.933,
+    "action": "block",
+    "reasons": [
+      "L2 domain_tld_swap",
+      "live: resolves, mx, registered",
+      "can send mail"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "13.248.169.48",
+      "76.223.54.146"
+    ],
+    "res_has_mx": true,
+    "res_created": "2025-11-14T22:57:35.0Z",
+    "res_registrar": "GoDaddy.com, LLC",
+    "res_error": null
+  },
+  {
+    "domain": "andshake.com",
+    "technique": "omission",
+    "source": "handshake.com",
+    "score": 0.8513,
+    "risk": 0.9256,
+    "action": "block",
+    "reasons": [
+      "L2 domain_close_typo",
+      "live: resolves, registered"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "13.223.25.84",
+      "54.243.117.197"
+    ],
+    "res_has_mx": false,
+    "res_created": "2018-06-30T18:55:48Z",
+    "res_registrar": "TurnCommerce, Inc. DBA NameBright.com",
+    "res_error": null
+  },
+  {
+    "domain": "bandshake.com",
+    "technique": "replacement",
+    "source": "handshake.com",
+    "score": 0.8513,
+    "risk": 0.9256,
+    "action": "block",
+    "reasons": [
+      "L2 domain_close_typo",
+      "live: resolves, registered"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "13.223.25.84",
+      "54.243.117.197"
+    ],
+    "res_has_mx": false,
+    "res_created": "2012-02-20T19:23:25Z",
+    "res_registrar": "TurnCommerce, Inc. DBA NameBright.com",
+    "res_error": null
+  },
+  {
+    "domain": "handhake.com",
+    "technique": "omission",
+    "source": "handshake.com",
+    "score": 0.8513,
+    "risk": 0.9256,
+    "action": "block",
+    "reasons": [
+      "L2 domain_close_typo",
+      "live: resolves, registered"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "64.31.3.228"
+    ],
+    "res_has_mx": false,
+    "res_created": "2018-09-17T20:51:55Z",
+    "res_registrar": "Media Elite Holdings Limited, S.A.",
+    "res_error": null
+  },
+  {
+    "domain": "handhsake.com",
+    "technique": "transposition",
+    "source": "handshake.com",
+    "score": 0.8513,
+    "risk": 0.9256,
+    "action": "block",
+    "reasons": [
+      "L2 domain_close_typo",
+      "live: resolves, registered"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "64.31.3.230"
+    ],
+    "res_has_mx": false,
+    "res_created": "2018-09-13T20:47:53Z",
+    "res_registrar": "Media Elite Holdings Limited, S.A.",
+    "res_error": null
+  },
+  {
+    "domain": "handshak.com",
+    "technique": "omission",
+    "source": "handshake.com",
+    "score": 0.8513,
+    "risk": 0.9256,
+    "action": "block",
+    "reasons": [
+      "L2 domain_close_typo",
+      "live: resolves, registered"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "52.20.84.62"
+    ],
+    "res_has_mx": false,
+    "res_created": null,
+    "res_registrar": null,
+    "res_error": null
+  },
+  {
+    "domain": "handshale.com",
+    "technique": "replacement",
+    "source": "handshake.com",
+    "score": 0.8513,
+    "risk": 0.9256,
+    "action": "block",
+    "reasons": [
+      "L2 domain_close_typo",
+      "live: resolves, registered"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "216.245.213.73"
+    ],
+    "res_has_mx": false,
+    "res_created": "2019-02-08T21:27:58Z",
+    "res_registrar": "Media Elite Holdings Limited, S.A.",
+    "res_error": null
+  },
+  {
+    "domain": "hndshake.com",
+    "technique": "omission",
+    "source": "handshake.com",
+    "score": 0.8513,
+    "risk": 0.9256,
+    "action": "block",
+    "reasons": [
+      "L2 domain_close_typo",
+      "live: resolves, registered"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "104.21.23.70",
+      "172.67.209.125"
+    ],
+    "res_has_mx": false,
+    "res_created": "2020-06-28T04:21:38Z",
+    "res_registrar": "Cloudflare, Inc.",
+    "res_error": null
+  },
+  {
+    "domain": "joinhabdshake.com",
+    "technique": "replacement",
+    "source": "joinhandshake.com",
+    "score": 0.8513,
+    "risk": 0.9256,
+    "action": "block",
+    "reasons": [
+      "L2 domain_close_typo",
+      "live: registered"
+    ],
+    "res_registered": true,
+    "res_addresses": [],
+    "res_has_mx": false,
+    "res_created": "2018-08-20T05:55:51Z",
+    "res_registrar": "TuringSign Inc. d/b/a Cosmotown",
+    "res_error": null
+  },
+  {
+    "domain": "joinhamdshake.com",
+    "technique": "replacement",
+    "source": "joinhandshake.com",
+    "score": 0.8513,
+    "risk": 0.9256,
+    "action": "block",
+    "reasons": [
+      "L2 domain_close_typo",
+      "live: resolves, registered"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "15.197.148.33",
+      "3.33.130.190"
+    ],
+    "res_has_mx": false,
+    "res_created": "2026-05-04T17:11:08Z",
+    "res_registrar": "GoDaddy.com, LLC",
+    "res_error": null
+  },
+  {
+    "domain": "joinhandhsake.com",
+    "technique": "transposition",
+    "source": "joinhandshake.com",
+    "score": 0.8513,
+    "risk": 0.9256,
+    "action": "block",
+    "reasons": [
+      "L2 domain_close_typo",
+      "live: resolves, registered"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "216.245.213.78"
+    ],
+    "res_has_mx": false,
+    "res_created": "2019-09-11T02:08:26Z",
+    "res_registrar": "Media Elite Holdings Limited, S.A.",
+    "res_error": null
+  },
+  {
+    "domain": "handshake.careers",
+    "technique": "tld_swap",
+    "source": "handshake.com",
+    "score": 0.8086,
+    "risk": 0.9043,
+    "action": "block",
+    "reasons": [
+      "L2 domain_tld_swap",
+      "live: resolves, registered"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "104.21.69.238",
+      "172.67.215.200"
+    ],
+    "res_has_mx": false,
+    "res_created": "2025-03-04T00:09:21.33Z",
+    "res_registrar": "Cloudflare, Inc",
+    "res_error": null
+  },
+  {
+    "domain": "handshake.live",
+    "technique": "tld_swap",
+    "source": "handshake.com",
+    "score": 0.8086,
+    "risk": 0.9043,
+    "action": "block",
+    "reasons": [
+      "L2 domain_tld_swap",
+      "live: resolves, registered"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "44.232.173.249",
+      "52.40.42.113"
+    ],
+    "res_has_mx": false,
+    "res_created": "2025-11-12T18:00:50.246Z",
+    "res_registrar": "Spaceship, Inc.",
+    "res_error": null
+  },
+  {
+    "domain": "handshake.net",
+    "technique": "tld_swap",
+    "source": "handshake.com",
+    "score": 0.8086,
+    "risk": 0.9043,
+    "action": "block",
+    "reasons": [
+      "L2 domain_tld_swap",
+      "live: resolves, registered"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "208.91.197.27"
+    ],
+    "res_has_mx": false,
+    "res_created": null,
+    "res_registrar": null,
+    "res_error": null
+  },
+  {
+    "domain": "handshake.site",
+    "technique": "tld_swap",
+    "source": "handshake.com",
+    "score": 0.8086,
+    "risk": 0.9043,
+    "action": "block",
+    "reasons": [
+      "L2 domain_tld_swap",
+      "live: resolves, registered"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "91.195.241.232"
+    ],
+    "res_has_mx": false,
+    "res_created": "2026-04-03T03:58:39.296Z",
+    "res_registrar": "PDR Ltd. d/b/a PublicDomainRegistry.com",
+    "res_error": null
+  },
+  {
+    "domain": "handshake.support",
+    "technique": "tld_swap",
+    "source": "handshake.com",
+    "score": 0.8086,
+    "risk": 0.9043,
+    "action": "block",
+    "reasons": [
+      "L2 domain_tld_swap",
+      "live: registered"
+    ],
+    "res_registered": true,
+    "res_addresses": [],
+    "res_has_mx": false,
+    "res_created": "2023-02-11T19:49:49.843Z",
+    "res_registrar": "Squarespace Domains II LLC",
+    "res_error": null
+  },
+  {
+    "domain": "handshake.top",
+    "technique": "tld_swap",
+    "source": "handshake.com",
+    "score": 0.8086,
+    "risk": 0.9043,
+    "action": "block",
+    "reasons": [
+      "L2 domain_tld_swap",
+      "live: resolves, registered"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "54.215.31.113"
+    ],
+    "res_has_mx": false,
+    "res_created": "2024-11-22T18:21:13.0Z",
+    "res_registrar": "Dynadot LLC",
+    "res_error": null
+  },
+  {
+    "domain": "joinhandshake.careers",
+    "technique": "tld_swap",
+    "source": "joinhandshake.com",
+    "score": 0.8086,
+    "risk": 0.9043,
+    "action": "block",
+    "reasons": [
+      "L2 domain_tld_swap",
+      "live: registered"
+    ],
+    "res_registered": true,
+    "res_addresses": [],
+    "res_has_mx": false,
+    "res_created": "2018-04-05T18:34:53.997Z",
+    "res_registrar": "Squarespace Domains II LLC",
+    "res_error": null
+  },
+  {
+    "domain": "joinhandshake.cc",
+    "technique": "tld_swap",
+    "source": "joinhandshake.com",
+    "score": 0.8086,
+    "risk": 0.9043,
+    "action": "block",
+    "reasons": [
+      "L2 domain_tld_swap",
+      "live: registered"
+    ],
+    "res_registered": true,
+    "res_addresses": [],
+    "res_has_mx": false,
+    "res_created": "2018-04-05T18:33:12Z",
+    "res_registrar": "Key-Systems GmbH",
+    "res_error": null
+  },
+  {
+    "domain": "joinhandshake.info",
+    "technique": "tld_swap",
+    "source": "joinhandshake.com",
+    "score": 0.8086,
+    "risk": 0.9043,
+    "action": "block",
+    "reasons": [
+      "L2 domain_tld_swap",
+      "live: registered"
+    ],
+    "res_registered": true,
+    "res_addresses": [],
+    "res_has_mx": false,
+    "res_created": "2018-04-05T18:33:35.139Z",
+    "res_registrar": "Squarespace Domains II LLC",
+    "res_error": null
+  },
+  {
+    "domain": "joinhandshake.net",
+    "technique": "tld_swap",
+    "source": "joinhandshake.com",
+    "score": 0.8086,
+    "risk": 0.9043,
+    "action": "block",
+    "reasons": [
+      "L2 domain_tld_swap",
+      "live: registered"
+    ],
+    "res_registered": true,
+    "res_addresses": [],
+    "res_has_mx": false,
+    "res_created": "2018-04-05T18:34:01Z",
+    "res_registrar": "Squarespace Domains II LLC",
+    "res_error": null
+  },
+  {
+    "domain": "joinhandshake.online",
+    "technique": "tld_swap",
+    "source": "joinhandshake.com",
+    "score": 0.8086,
+    "risk": 0.9043,
+    "action": "block",
+    "reasons": [
+      "L2 domain_tld_swap",
+      "live: resolves, registered"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "13.52.188.95",
+      "52.52.192.191"
+    ],
+    "res_has_mx": false,
+    "res_created": "2026-07-12T16:48:33.619Z",
+    "res_registrar": "NameCheap, Inc.",
+    "res_error": null
+  },
+  {
+    "domain": "joinhandshake.org",
+    "technique": "tld_swap",
+    "source": "joinhandshake.com",
+    "score": 0.8086,
+    "risk": 0.9043,
+    "action": "block",
+    "reasons": [
+      "L2 domain_tld_swap",
+      "live: registered"
+    ],
+    "res_registered": true,
+    "res_addresses": [],
+    "res_has_mx": false,
+    "res_created": "2018-04-05T18:34:16.438Z",
+    "res_registrar": "Squarespace Domains II LLC",
+    "res_error": null
+  },
+  {
+    "domain": "joinhandshake.site",
+    "technique": "tld_swap",
+    "source": "joinhandshake.com",
+    "score": 0.8086,
+    "risk": 0.9043,
+    "action": "block",
+    "reasons": [
+      "L2 domain_tld_swap",
+      "live: resolves, registered"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "216.198.79.1"
+    ],
+    "res_has_mx": false,
+    "res_created": "2026-03-11T16:49:44.000Z",
+    "res_registrar": "HOSTINGER operations, UAB",
+    "res_error": null
+  },
+  {
+    "domain": "j0inhandshake.com",
+    "technique": "leet",
+    "source": "joinhandshake.com",
+    "score": 0.6838,
+    "risk": 0.8419,
+    "action": "watch",
+    "reasons": [
+      "L2 domain_skeleton_match",
+      "live: resolves, registered"
+    ],
+    "res_registered": true,
+    "res_addresses": [
+      "13.52.188.95",
+      "52.52.192.191"
+    ],
+    "res_has_mx": false,
+    "res_created": null,
+    "res_registrar": null,
+    "res_error": null
+  }
+]

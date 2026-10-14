@@ -131,3 +131,20 @@ def test_llm_confidence_is_clamped_and_unknown_signals_dropped():
 
 def test_labels_are_stable():
     assert LABELS[0] == "benign" and len(LABELS) == 5
+
+
+def test_llm_cache_avoids_repeat_calls_but_not_for_unknown():
+    be = StaticBackend(_ok("recruiter_scam", 0.7, ("off_platform_move",)))
+    clf = LLMIntentClassifier(be)
+    m = Message(body="same text", sender_address="a@b.io")
+    assert clf.classify(m).label == clf.classify(m).label and len(be.calls) == 1
+    bad = StaticBackend("garbage")
+    clf2 = LLMIntentClassifier(bad, retries=0)
+    clf2.classify(m); clf2.classify(m)
+    assert len(bad.calls) == 2
+
+
+def test_model_claimed_injection_signal_is_dropped_without_prefilter_hit():
+    be = StaticBackend(_ok("benign", 0.9, ("injection_attempt", "urgency")))
+    r = LLMIntentClassifier(be).classify(Message(body="please reply by Friday"))
+    assert r.signals == ("urgency",) and r.label == "benign"
