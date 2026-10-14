@@ -79,7 +79,7 @@ regardless of what the model says; output is schema-validated and a model that a
 "benign" to a message carrying an injection is overruled to `unknown`; unparseable output
 fails closed. The rule baseline cannot be hijacked at all, which is why both ship.
 
-## Benchmark results (rule backend, v0.1.0)
+## Benchmark results
 
 Full table: [`benchmarks/benchmark_rule.md`](benchmarks/benchmark_rule.md). Recall on
 46 malicious messages / false-positive rate on 30 benign, by variant:
@@ -94,11 +94,59 @@ Full table: [`benchmarks/benchmark_rule.md`](benchmarks/benchmark_rule.md). Reca
 ¹ malicious-only variants (recall). Injection hijack rate for the rule backend: 0 of 46.
 
 **Read these numbers honestly.** The seed corpus is also the development set for the
-rule baseline, so its clean-corpus numbers are in-sample. The out-of-sample test is
-`impersonation-detector paraphrase`, which has a model you choose rewrite every message,
-and the `--extra` flag, which benchmarks against those rewrites. Layers 1 and 2 only
-know the protected brand, so their low recall on scams that never mention it is expected;
-their job is the sender, Layer 3's is the request.
+rule baseline, so its clean-corpus numbers are in-sample. Layers 1 and 2 only know the
+protected brand, so their low recall on scams that never mention it is expected; their
+job is the sender, Layer 3's is the request.
+
+### Out-of-sample: Llama-paraphrased corpus
+
+`impersonation-detector paraphrase` had Llama 3.1 8B rewrite all 76 messages (same intent,
+different wording; `benchmarks/paraphrase_llama3.1_8b.jsonl`) and `bench --only-extra`
+scored the rewrites alone. The rule baseline had never seen this wording.
+
+| Backend | Config | recall | FPR | credential_phish | payment_redirect | recruiter_scam | support_impersonation |
+|---|---|---|---|---|---|---|---|
+| rule | L3 | 0.87 | 0.00 | 0.90 | 1.00 | 0.93 | 0.71 |
+| rule | L1+L2+L3 | **0.96** | **0.00** | 0.90 | 1.00 | 0.93 | 1.00 |
+| llama3.1:8b | L3 | 1.00 | 0.30 | 1.00 | 1.00 | 1.00 | 1.00 |
+| llama3.1:8b | L1+L2+L3 | 1.00 | 0.30 | 1.00 | 1.00 | 1.00 | 1.00 |
+
+The rules lose 13 points of Layer 3 recall to paraphrase, most of it on support
+impersonation, and the sender layers win 9 of those back: a rewritten support-impersonation
+message still comes from a free-mail address with the brand in its display name.
+
+### LLM backend: Llama 3.1 8B via Ollama (`benchmarks/benchmark_llm_ollama_llama3.1_8b.md`)
+
+| Config | clean | homoglyph | zero_width | leet | spaced | synonym | injection¹ | link variants¹ |
+|---|---|---|---|---|---|---|---|---|
+| L3 | 1.00 / 0.33 | 1.00 / 0.30 | 1.00 / 0.30 | 1.00 / 0.43 | 1.00 / 0.37 | 1.00 / 0.33 | 1.00 | 1.00 |
+| L1+L2+L3 | 1.00 / 0.33 | 1.00 / 0.33 | 1.00 / 0.33 | 1.00 / 0.43 | 1.00 / 0.37 | 1.00 / 0.33 | 1.00 | 1.00 |
+
+Three things the LLM run shows, all from `benchmarks/dump_llama3.1_8b.jsonl`:
+
+- **Recall is perfect and robustness is free.** No obfuscation variant and no paraphrase
+  moved the 8B model off 1.00 recall. The regex baseline needed explicit confusable folding
+  and de-spacing to get close.
+- **The false positives are the hard benign cases, and confidence does not separate them.**
+  Ten of 30 benign messages are flagged on the clean corpus: a genuine "your password was
+  changed" notice, a payroll onboarding note that says *never* send bank details by email,
+  a financial-aid verification request, a background-check email, an I-9/W-4 onboarding
+  message, a professor asking for a resume. The model's rationales invent cues ("requests
+  sensitive documents") that are not in the text. It assigns 0.8 to 0.9 confidence to these
+  and 0.9 to 1.0 to real attacks, so no threshold helps: at 0.95 the FPR reaches 0.00 but
+  recall collapses to 0.41. A small model that is right about intent is not calibrated
+  about it.
+- **The injection pre-filter earned its place.** Under the injection variant the model
+  complied with the injected instruction and answered "benign" on 5 of 46 attacks. All five
+  were overruled to `unknown` (held, not delivered) because the deterministic pre-filter had
+  already flagged the body. The hijack count in the table is 0 only because of that overrule.
+
+So the two Layer 3 options sit at opposite corners: the rules at FPR 0.00 with recall that
+degrades under paraphrase, the 8B model at recall 1.00 with an FPR no platform could ship.
+The pipeline's noisy-OR takes either, and the obvious next experiment is a larger or
+instruction-tuned model, which the `--backend anthropic` and `--backend openai` paths run
+unchanged. Latency in the LLM tables is not meaningful: responses are served from the
+persistent cache on reruns; uncached calls took 2 to 6 seconds each on an M4 Max.
 
 What the benchmark already shows:
 
@@ -187,9 +235,9 @@ python -m venv .venv && . .venv/bin/activate && pip install -e ".[dev]"
 pytest -q                                                   # 61 tests
 python -m impersonation_detector.train                      # retrain Layer 2 (3 s, pure Python)
 impersonation-detector bench -p handshake.com -p Handshake -p "Handshake Support" --out benchmarks/
-impersonation-detector bench ... --backend ollama --model llama3.1:8b     # LLM Layer 3
+impersonation-detector bench ... --backend ollama --model llama3.1:8b --cache benchmarks/cache.jsonl --dump benchmarks/dump.jsonl
 impersonation-detector paraphrase ... --backend anthropic --out benchmarks/para.jsonl
-impersonation-detector bench ... --extra benchmarks/para.jsonl
+impersonation-detector bench ... --extra benchmarks/para.jsonl --only-extra
 impersonation-detector watch -p handshake.com -p Handshake --out benchmarks/watch.json   # live DNS + RDAP
 impersonation-detector ato-bench --accounts 400 --out benchmarks/
 ```
