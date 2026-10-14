@@ -8,6 +8,8 @@ Layer 4 — benchmark with adversarial variants (:mod:`bench`).
 :class:`Detector` combines 1–3; :class:`Middleware` wraps a send pipeline.
 """
 
+from .ato import AccountTakeoverDetector, AtoVerdict, CampaignDetector, Event
+from .domainwatch import DomainWatch, LookalikeGenerator, WatchHit
 from .features import FeatureExtractor, Sender
 from .intent import (
     LABELS,
@@ -30,12 +32,18 @@ from .skeleton import confusable, fold_skeleton, skeleton
 __all__ = [
     "LABELS",
     "SIGNALS",
+    "AccountTakeoverDetector",
     "AnthropicBackend",
+    "AtoVerdict",
+    "CampaignDetector",
     "Detector",
+    "DomainWatch",
+    "Event",
     "FeatureExtractor",
     "IntentResult",
     "LLMIntentClassifier",
     "LookalikeDetector",
+    "LookalikeGenerator",
     "Match",
     "Message",
     "Middleware",
@@ -47,6 +55,7 @@ __all__ = [
     "SenderScorer",
     "Thresholds",
     "Verdict",
+    "WatchHit",
     "confusable",
     "fold_skeleton",
     "is_mixed_script",
@@ -54,4 +63,4 @@ __all__ = [
     "scripts_in",
     "skeleton",
 ]
-__version__ = "0.1.0"
+__version__ = "0.2.0"

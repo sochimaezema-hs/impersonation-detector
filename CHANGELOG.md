@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.2.0 — 2026-10-13
+
+The other two legs of the endeavor, same approach as the message detector.
+
+- **Lookalike-domain watch** (`domainwatch.py`): 13-technique permutation generator,
+  pluggable resolver (system DNS, `dig` MX, public RDAP registration date), Layer 2
+  scoring plus live / recently-registered / mail-capable evidence, JSON export, and a
+  `blocklist=` parameter on `Detector` that blocks senders and links on judged domains.
+  CLI `watch`, `analyze --blocklist`.
+- **Account-takeover detector** (`ato.py`): per-account baseline, 15 named features,
+  verdicts with reasons at every login and sensitive change; `CampaignDetector` for
+  shared-IP credential stuffing across accounts, feeding `attacker_ips` back into the
+  per-account scorer. Synthetic benchmark with 9 benign day types and 8 attack scripts
+  (`ato_bench.py`, CLI `ato-bench`); CLI `ato` for JSONL event logs.
+- Publishing: `publish.yml` releases to PyPI on a `v*` tag via Trusted Publishing.
+- 61 tests.
+
 ## 0.1.0 — 2026-10-09
 
 First complete release of all four layers.

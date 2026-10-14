@@ -7,7 +7,7 @@ in messages — built as middleware for platforms whose users are contacted by
 strangers claiming an institutional role (job boards, campus networks, marketplaces).
 Zero runtime dependencies; an optional language model for Layer 3.
 
-**Status:** 0.1.0 — all four layers implemented, benchmarked, and tested.
+**Status:** 0.2.0 — message detector (Layers 1–4) plus the lookalike-domain and account-takeover legs, all benchmarked and tested.
 
 ## Why this exists
 
@@ -47,6 +47,8 @@ impersonation-detector check "hаndshake.com" -p handshake.com            # Laye
 impersonation-detector score "Handshake Support <hs.support@gmail.com>" -p handshake.com -p Handshake
 impersonation-detector analyze messages.jsonl -p handshake.com -p Handshake --backend ollama
 impersonation-detector bench -p handshake.com -p Handshake --out benchmarks/
+impersonation-detector watch -p handshake.com -p Handshake --out watch.json      # lookalike-domain leg
+impersonation-detector ato events.jsonl                                           # account-takeover leg
 ```
 
 Drop it in front of a send pipeline:
@@ -107,17 +109,75 @@ What the benchmark already shows:
 - **Negation matters.** "Never send bank details by email" from a real employer must not be
   a payment request.
 
+
+## The other two legs
+
+The message detector covers the attack's opening move. Two further modules apply the same
+approach — named features, transparent scoring, graduated actions, a synthetic benchmark —
+to the domain the attacker registers and to the account they take over.
+
+### Lookalike-domain watch (`domainwatch.py`)
+
+Enumerates the registrable lookalike space around each protected domain (13 techniques:
+homoglyph, omission, transposition, repetition, keyboard insertion and replacement, vowel
+swap, leet, hyphenation, TLD swap, affix, prefix, plural; ~230 candidates for one 9-letter
+domain), resolves each (system DNS, `dig` for MX, public RDAP for registration date), and
+scores it with the same Layer 2 model plus three pieces of evidence: it is live, it was
+registered recently, it can send mail. Hits export as JSON and load straight back into the
+message detector as a blocklist (`analyze --blocklist watch.json`), so a domain judged
+today blocks a message tomorrow before any text is read.
+
+```python
+from impersonation_detector import DomainWatch, Detector
+hits = DomainWatch(["handshake.com", "Handshake"]).scan()          # network; StaticResolver for tests
+det = Detector(["handshake.com", "Handshake"], blocklist=DomainWatch.blocklist(hits))
+```
+
+[dnstwist](https://github.com/elceef/dnstwist) pioneered permutation generation; this
+module adds the explainable score, the recency and mail-capability evidence, and the loop
+back into the send pipeline.
+
+### Account-takeover detector (`ato.py`)
+
+Scores an account's login and post-login event stream at every login and sensitive change,
+using a per-account baseline (devices, countries, ASNs, hours, message rate) learned from
+history. Fifteen named features: new device / country / ASN, impossible travel, a failed
+burst before success (distinguishing a forgotten password on a known device from
+credential stuffing on an unseen one), a sensitive change shortly after a risky login, a
+chain of sensitive changes, MFA or recovery weakened, payout changed, mass messaging,
+message-rate anomaly, IP velocity, off-hours, and — the cross-account signal — a login IP
+that `CampaignDetector` has already seen hitting many accounts. Verdicts carry reasons;
+`warn` is meant as a step-up challenge, `hold` and `block` as detections.
+
+Synthetic benchmark (`impersonation-detector ato-bench`, 400 accounts, half with a
+plausible benign day such as a new phone, a trip abroad with a reset, or six wrong
+passwords from the usual laptop; half with one of eight attack scripts):
+
+| Detector | recall | FPR | stuffing → chain | new country + payout | impossible travel + reset | mass msgs after new device | MFA off + recovery | shared-IP campaign | quiet new device + payout | stolen known device |
+|---|---|---|---|---|---|---|---|---|---|---|
+| per account | 0.84 | 0.01 | 1.00 | 1.00 | 1.00 | 0.72 | 1.00 | 0.00 | 1.00 | 1.00 |
+| + campaign IP feed | **1.00** | **0.01** | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+
+The point of the table is the second row: an attacker who logs in from a new device in the
+victim's own country and changes one thing looks like a user with a new phone, until the
+same IP is seen touching other accounts. Per-account anomaly detection alone cannot make
+that distinction; the cross-account signal is what closes it. The benchmark is synthetic
+and the generator is in `ato_bench.py`; treat the numbers as a demonstration of the
+mechanism, not as a field result.
+
 ## Reproduce
 
 ```bash
 git clone https://github.com/sochimaezema-hs/impersonation-detector && cd impersonation-detector
 python -m venv .venv && . .venv/bin/activate && pip install -e ".[dev]"
-pytest -q                                                   # 48 tests
+pytest -q                                                   # 61 tests
 python -m impersonation_detector.train                      # retrain Layer 2 (3 s, pure Python)
 impersonation-detector bench -p handshake.com -p Handshake -p "Handshake Support" --out benchmarks/
 impersonation-detector bench ... --backend ollama --model llama3.1:8b     # LLM Layer 3
 impersonation-detector paraphrase ... --backend anthropic --out benchmarks/para.jsonl
 impersonation-detector bench ... --extra benchmarks/para.jsonl
+impersonation-detector watch -p handshake.com -p Handshake --out benchmarks/watch.json   # live DNS + RDAP
+impersonation-detector ato-bench --accounts 400 --out benchmarks/
 ```
 
 Swap in your own brand: every command takes `-p` names; the seed corpus is templated on

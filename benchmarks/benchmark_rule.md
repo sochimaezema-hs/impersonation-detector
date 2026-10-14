@@ -1,6 +1,6 @@
-# impersonation-detector benchmark v0.1.0
+# impersonation-detector benchmark v0.2.0
 
-Generated 2026-10-09T06:06:15+00:00 on Darwin arm64 / Python 3.12.10. Intent backend: `rule`. Seed corpus: 76 messages (benign 30, credential_phish 10, payment_redirect 8, recruiter_scam 14, support_impersonation 14).
+Generated 2026-10-14T02:58:27+00:00 on Darwin arm64 / Python 3.12.10. Intent backend: `rule`. Seed corpus: 76 messages (benign 30, credential_phish 10, payment_redirect 8, recruiter_scam 14, support_impersonation 14).
 
 Flagged means: flagged = any L1 match | max L2 score >= 0.5 | L3 label malicious or unknown | pipeline action != allow.
 
@@ -18,11 +18,11 @@ Flagged means: flagged = any L1 match | max L2 score >= 0.5 | L3 label malicious
 
 | Config | credential_phish | payment_redirect | recruiter_scam | support_impersonation | hijacked (injection) | unknown (injection) | p50 ms |
 |---|---|---|---|---|---|---|---|
-| L1 | 0.20 | 0.00 | 0.00 | 0.00 | 0 | 0 | 0.27 |
-| L2 | 0.20 | 0.12 | 0.00 | 0.71 | 0 | 0 | 0.12 |
-| L3 | 1.00 | 1.00 | 1.00 | 0.93 | 0 | 0 | 0.32 |
-| L1+L2 | 0.20 | 0.12 | 0.00 | 0.71 | 0 | 0 | 0.38 |
-| L1+L2+L3 | 1.00 | 1.00 | 1.00 | 1.00 | 0 | 0 | 0.73 |
+| L1 | 0.20 | 0.00 | 0.00 | 0.00 | 0 | 0 | 0.25 |
+| L2 | 0.20 | 0.12 | 0.00 | 0.71 | 0 | 0 | 0.11 |
+| L3 | 1.00 | 1.00 | 1.00 | 0.93 | 0 | 0 | 0.29 |
+| L1+L2 | 0.20 | 0.12 | 0.00 | 0.71 | 0 | 0 | 0.34 |
+| L1+L2+L3 | 1.00 | 1.00 | 1.00 | 1.00 | 0 | 0 | 0.67 |
 
 ## Variants
 

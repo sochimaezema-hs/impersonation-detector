@@ -13,7 +13,7 @@ import re
 from collections.abc import Callable
 from dataclasses import dataclass, field
 
-from .domains import normalize_host
+from .domains import normalize_host, registrable
 from .features import Sender
 from .intent import IntentResult, LLMIntentClassifier, Message, RuleIntentClassifier
 from .lookalike import LookalikeDetector, Match
@@ -103,13 +103,17 @@ class Detector:
     def __init__(self, protected: list[str],
                  intent: RuleIntentClassifier | LLMIntentClassifier | None = None,
                  thresholds: Thresholds | None = None,
-                 layers: frozenset[int] = frozenset({1, 2, 3})) -> None:
+                 layers: frozenset[int] = frozenset({1, 2, 3}),
+                 blocklist: set[str] | None = None) -> None:
         self.protected = protected
         self.lookalike = LookalikeDetector(protected)
         self.scorer = SenderScorer(protected)
         self.intent = intent if intent is not None else RuleIntentClassifier()
         self.thresholds = thresholds or Thresholds()
         self.layers = frozenset(layers)
+        # Domains the lookalike-domain watch (domainwatch.py) has already judged: a sender
+        # or link on one of them is blocked outright.
+        self.blocklist = {normalize_host(d) for d in (blocklist or set())}
 
     def _action(self, risk: float) -> str:
         t = self.thresholds
@@ -128,6 +132,11 @@ class Detector:
         hosts = extract_hosts(f"{msg.subject}\n{msg.body}", msg.links)
         risks: list[float] = []
         floor = 0.0
+
+        for host in [sender_domain, *hosts]:
+            if host and (host in self.blocklist or registrable(host) in self.blocklist):
+                floor = max(floor, 0.95)
+                reasons.append(f"blocklisted domain {host!r} (lookalike-domain watch)")
 
         lookalikes: list[Match] = []
         if 1 in self.layers:

@@ -85,6 +85,7 @@ def main(argv: list[str] | None = None) -> int:
     an.add_argument("--warn", type=float, default=0.30)
     an.add_argument("--hold", type=float, default=0.60)
     an.add_argument("--block", type=float, default=0.85)
+    an.add_argument("--blocklist", default=None, help="JSON from `watch --out`, or a newline list of domains")
 
     be = sub.add_parser("bench", help="Layer 4: run the benchmark and write JSON + Markdown reports")
     _add_protected(be)
@@ -105,6 +106,25 @@ def main(argv: list[str] | None = None) -> int:
     ex = sub.add_parser("export-seed", help="write the seed corpus for a protected set as JSONL")
     _add_protected(ex)
     ex.add_argument("--out", default="-")
+
+    wa = sub.add_parser("watch", help="lookalike-domain leg: enumerate, resolve, and score lookalike domains")
+    _add_protected(wa)
+    wa.add_argument("--no-resolve", action="store_true", help="generate and score only; no network")
+    wa.add_argument("--all", action="store_true", help="include candidates that are not live")
+    wa.add_argument("--limit", type=int, default=None)
+    wa.add_argument("--no-rdap", action="store_true")
+    wa.add_argument("--pause", type=float, default=0.1, help="seconds between lookups")
+    wa.add_argument("--out", default=None, help="write hits as JSON (load with analyze --blocklist)")
+
+    ab = sub.add_parser("ato-bench", help="account-takeover leg: synthetic benchmark")
+    ab.add_argument("--accounts", type=int, default=200)
+    ab.add_argument("--seed", type=int, default=0)
+    ab.add_argument("--out", default="benchmarks")
+
+    at = sub.add_parser("ato", help="account-takeover leg: score a JSONL event log (one account or many)")
+    at.add_argument("path")
+    at.add_argument("--history-days", type=float, default=30.0,
+                    help="events older than this many days before the last event form the baseline")
 
     sk = sub.add_parser("skeleton", help="print the UTS #39 skeleton and scripts of a string")
     sk.add_argument("text", nargs="+")
@@ -157,8 +177,15 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.cmd == "analyze":
         from .pipeline import Thresholds
+        blocklist: set[str] = set()
+        if args.blocklist:
+            raw = Path(args.blocklist).read_text(encoding="utf-8").strip()
+            if raw.startswith("["):
+                blocklist = {h["domain"] for h in json.loads(raw) if h.get("action") in ("watch", "block")}
+            else:
+                blocklist = {line.strip() for line in raw.splitlines() if line.strip()}
         det = Detector(args.protected, intent=_intent(args),
-                       thresholds=Thresholds(args.warn, args.hold, args.block))
+                       thresholds=Thresholds(args.warn, args.hold, args.block), blocklist=blocklist)
         any_bad = False
         for msg in _read_messages(args.path):
             v = det.analyze(msg)
@@ -184,6 +211,53 @@ def main(argv: list[str] | None = None) -> int:
         print(rep.to_markdown())
         print(f"wrote {j}\nwrote {m}", file=sys.stderr)
         return 0
+
+    if args.cmd == "watch":
+        from .domainwatch import DnsRdapResolver, DomainWatch
+        watch = DomainWatch(args.protected, resolver=DnsRdapResolver(rdap=not args.no_rdap, pause=args.pause))
+        hits = watch.scan(resolve=not args.no_resolve, limit=args.limit, only_live=not args.all)
+        for h in hits:
+            print(f"{h.action:5s} {h.risk:.2f}  {h.candidate.domain:40s} {h.candidate.technique:14s} {'; '.join(h.reasons)}")
+        print(f"{len(hits)} candidates" + ("" if args.no_resolve else " live") +
+              f" of {len(watch.generator.generate(args.limit))} generated", file=sys.stderr)
+        if args.out:
+            Path(args.out).write_text(json.dumps([h.to_dict() for h in hits], indent=2, ensure_ascii=False) + "\n")
+            print(f"wrote {args.out}", file=sys.stderr)
+        return 0
+
+    if args.cmd == "ato-bench":
+        from .ato_bench import ato_report_markdown, run_ato_benchmark
+        res = run_ato_benchmark(args.accounts, args.seed)
+        md = ato_report_markdown(res)
+        print(md)
+        out = Path(args.out)
+        out.mkdir(parents=True, exist_ok=True)
+        (out / "benchmark_ato.json").write_text(json.dumps(res, indent=2) + "\n")
+        (out / "benchmark_ato.md").write_text(md)
+        return 0
+
+    if args.cmd == "ato":
+        from .ato import AccountTakeoverDetector, CampaignDetector, Event
+        rows = [json.loads(line) for line in Path(args.path).read_text(encoding="utf-8").splitlines() if line.strip()]
+        events = [Event(r["account_id"], r["kind"], float(r["ts"]), r.get("ip", ""), r.get("device_id", ""),
+                        r.get("country", ""), r.get("asn", ""), r.get("lat"), r.get("lon"), r.get("meta", {}))
+                  for r in rows]
+        campaigns = CampaignDetector().assess(events)
+        det = AccountTakeoverDetector(attacker_ips={c["ip"] for c in campaigns})
+        by_acct: dict[str, list[Event]] = {}
+        for e in events:
+            by_acct.setdefault(e.account_id, []).append(e)
+        last = max(e.ts for e in events) if events else 0.0
+        any_bad = False
+        for evs in by_acct.values():
+            hist = [e for e in evs if last - e.ts > args.history_days * 86400] or None
+            for v in det.assess(evs, history=hist):
+                if v.action != "allow":
+                    any_bad = True
+                    print(json.dumps(v.to_dict()))
+        for c in campaigns:
+            print(json.dumps({"campaign": c}))
+        return 1 if any_bad else 0
 
     if args.cmd == "paraphrase":
         from .bench import load_seed

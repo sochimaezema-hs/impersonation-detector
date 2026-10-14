@@ -5,8 +5,8 @@ type: software
 authors:
   - family-names: Ezema
     given-names: Sochima
-version: 0.1.0
-date-released: 2026-10-09
+version: 0.2.0
+date-released: 2026-10-13
 license: MIT
 repository-code: https://github.com/sochimaezema-hs/impersonation-detector
 keywords:

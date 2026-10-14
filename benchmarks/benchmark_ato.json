@@ -1,0 +1,33 @@
+{
+  "n_accounts": 400,
+  "seed": 0,
+  "campaign_alerts": 2,
+  "per_account": {
+    "recall": 0.84,
+    "fpr": 0.015,
+    "per_scenario_recall": {
+      "impossible_travel_reset": 1.0,
+      "mass_messaging_after_new_device": 0.72,
+      "mfa_disable_recovery": 1.0,
+      "new_country_payout": 1.0,
+      "quiet_new_device_payout": 1.0,
+      "shared_ip_campaign": 0.0,
+      "stolen_known_device": 1.0,
+      "stuffing_then_chain": 1.0
+    }
+  },
+  "per_account+campaign_ip": {
+    "recall": 1.0,
+    "fpr": 0.015,
+    "per_scenario_recall": {
+      "impossible_travel_reset": 1.0,
+      "mass_messaging_after_new_device": 1.0,
+      "mfa_disable_recovery": 1.0,
+      "new_country_payout": 1.0,
+      "quiet_new_device_payout": 1.0,
+      "shared_ip_campaign": 1.0,
+      "stolen_known_device": 1.0,
+      "stuffing_then_chain": 1.0
+    }
+  }
+}

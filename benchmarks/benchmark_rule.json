@@ -5,8 +5,8 @@
     "Handshake Support"
   ],
   "intent_backend": "rule",
-  "version": "0.1.0",
-  "generated_at": "2026-10-09T06:06:15+00:00",
+  "version": "0.2.0",
+  "generated_at": "2026-10-14T02:58:27+00:00",
   "machine": "Darwin arm64 / Python 3.12.10",
   "n_seed": 76,
   "label_counts": {
@@ -32,7 +32,7 @@
           "recruiter_scam": 0.0,
           "support_impersonation": 0.0
         },
-        "latency_ms_p50": 0.27
+        "latency_ms_p50": 0.25
       },
       "homoglyph": {
         "n": 76,
@@ -64,7 +64,7 @@
           "recruiter_scam": 0.0,
           "support_impersonation": 0.0
         },
-        "latency_ms_p50": 0.28
+        "latency_ms_p50": 0.27
       },
       "leet": {
         "n": 76,
@@ -80,7 +80,7 @@
           "recruiter_scam": 0.0,
           "support_impersonation": 0.0
         },
-        "latency_ms_p50": 0.27
+        "latency_ms_p50": 0.26
       },
       "spaced": {
         "n": 76,
@@ -96,7 +96,7 @@
           "recruiter_scam": 0.0,
           "support_impersonation": 0.071
         },
-        "latency_ms_p50": 0.27
+        "latency_ms_p50": 0.26
       },
       "synonym": {
         "n": 76,
@@ -112,7 +112,7 @@
           "recruiter_scam": 0.0,
           "support_impersonation": 0.0
         },
-        "latency_ms_p50": 0.27
+        "latency_ms_p50": 0.26
       },
       "injection": {
         "n": 46,
@@ -128,7 +128,7 @@
           "recruiter_scam": 0.0,
           "support_impersonation": 0.0
         },
-        "latency_ms_p50": 0.3
+        "latency_ms_p50": 0.28
       },
       "link_homoglyph": {
         "n": 46,
@@ -144,7 +144,7 @@
           "recruiter_scam": 0.0,
           "support_impersonation": 0.0
         },
-        "latency_ms_p50": 0.3
+        "latency_ms_p50": 0.29
       },
       "link_subdomain": {
         "n": 46,
@@ -160,7 +160,7 @@
           "recruiter_scam": 0.0,
           "support_impersonation": 0.0
         },
-        "latency_ms_p50": 0.32
+        "latency_ms_p50": 0.3
       },
       "sender_homoglyph": {
         "n": 46,
@@ -176,7 +176,7 @@
           "recruiter_scam": 1.0,
           "support_impersonation": 1.0
         },
-        "latency_ms_p50": 0.29
+        "latency_ms_p50": 0.27
       }
     },
     "L2": {
@@ -194,7 +194,7 @@
           "recruiter_scam": 0.0,
           "support_impersonation": 0.714
         },
-        "latency_ms_p50": 0.12
+        "latency_ms_p50": 0.11
       },
       "homoglyph": {
         "n": 76,
@@ -210,7 +210,7 @@
           "recruiter_scam": 0.0,
           "support_impersonation": 0.786
         },
-        "latency_ms_p50": 0.12
+        "latency_ms_p50": 0.11
       },
       "zero_width": {
         "n": 76,
@@ -226,7 +226,7 @@
           "recruiter_scam": 0.0,
           "support_impersonation": 0.714
         },
-        "latency_ms_p50": 0.12
+        "latency_ms_p50": 0.11
       },
       "leet": {
         "n": 76,
@@ -242,7 +242,7 @@
           "recruiter_scam": 0.0,
           "support_impersonation": 0.714
         },
-        "latency_ms_p50": 0.11
+        "latency_ms_p50": 0.12
       },
       "spaced": {
         "n": 76,
@@ -258,7 +258,7 @@
           "recruiter_scam": 0.0,
           "support_impersonation": 0.714
         },
-        "latency_ms_p50": 0.12
+        "latency_ms_p50": 0.13
       },
       "synonym": {
         "n": 76,
@@ -274,7 +274,7 @@
           "recruiter_scam": 0.0,
           "support_impersonation": 0.714
         },
-        "latency_ms_p50": 0.12
+        "latency_ms_p50": 0.11
       },
       "injection": {
         "n": 46,
@@ -306,7 +306,7 @@
           "recruiter_scam": 0.0,
           "support_impersonation": 0.929
         },
-        "latency_ms_p50": 0.14
+        "latency_ms_p50": 0.13
       },
       "link_subdomain": {
         "n": 46,
@@ -322,7 +322,7 @@
           "recruiter_scam": 0.0,
           "support_impersonation": 1.0
         },
-        "latency_ms_p50": 0.13
+        "latency_ms_p50": 0.11
       },
       "sender_homoglyph": {
         "n": 46,
@@ -356,7 +356,7 @@
           "recruiter_scam": 1.0,
           "support_impersonation": 0.929
         },
-        "latency_ms_p50": 0.32
+        "latency_ms_p50": 0.29
       },
       "homoglyph": {
         "n": 76,
@@ -372,7 +372,7 @@
           "recruiter_scam": 1.0,
           "support_impersonation": 0.929
         },
-        "latency_ms_p50": 0.34
+        "latency_ms_p50": 0.32
       },
       "zero_width": {
         "n": 76,
@@ -388,7 +388,7 @@
           "recruiter_scam": 1.0,
           "support_impersonation": 0.929
         },
-        "latency_ms_p50": 0.32
+        "latency_ms_p50": 0.29
       },
       "leet": {
         "n": 76,
@@ -404,7 +404,7 @@
           "recruiter_scam": 1.0,
           "support_impersonation": 0.714
         },
-        "latency_ms_p50": 0.35
+        "latency_ms_p50": 0.33
       },
       "spaced": {
         "n": 76,
@@ -420,7 +420,7 @@
           "recruiter_scam": 1.0,
           "support_impersonation": 0.929
         },
-        "latency_ms_p50": 0.43
+        "latency_ms_p50": 0.42
       },
       "synonym": {
         "n": 76,
@@ -436,7 +436,7 @@
           "recruiter_scam": 1.0,
           "support_impersonation": 0.857
         },
-        "latency_ms_p50": 0.32
+        "latency_ms_p50": 0.3
       },
       "injection": {
         "n": 46,
@@ -452,7 +452,7 @@
           "recruiter_scam": 1.0,
           "support_impersonation": 0.929
         },
-        "latency_ms_p50": 0.51
+        "latency_ms_p50": 0.49
       },
       "link_homoglyph": {
         "n": 46,
@@ -468,7 +468,7 @@
           "recruiter_scam": 1.0,
           "support_impersonation": 0.929
         },
-        "latency_ms_p50": 0.33
+        "latency_ms_p50": 0.29
       },
       "link_subdomain": {
         "n": 46,
@@ -484,7 +484,7 @@
           "recruiter_scam": 1.0,
           "support_impersonation": 0.929
         },
-        "latency_ms_p50": 0.35
+        "latency_ms_p50": 0.31
       },
       "sender_homoglyph": {
         "n": 46,
@@ -500,7 +500,7 @@
           "recruiter_scam": 1.0,
           "support_impersonation": 0.929
         },
-        "latency_ms_p50": 0.33
+        "latency_ms_p50": 0.31
       }
     },
     "L1+L2": {
@@ -518,7 +518,7 @@
           "recruiter_scam": 0.0,
           "support_impersonation": 0.714
         },
-        "latency_ms_p50": 0.38
+        "latency_ms_p50": 0.34
       },
       "homoglyph": {
         "n": 76,
@@ -534,7 +534,7 @@
           "recruiter_scam": 0.0,
           "support_impersonation": 0.786
         },
-        "latency_ms_p50": 0.38
+        "latency_ms_p50": 0.35
       },
       "zero_width": {
         "n": 76,
@@ -550,7 +550,7 @@
           "recruiter_scam": 0.0,
           "support_impersonation": 0.714
         },
-        "latency_ms_p50": 0.38
+        "latency_ms_p50": 0.36
       },
       "leet": {
         "n": 76,
@@ -566,7 +566,7 @@
           "recruiter_scam": 0.0,
           "support_impersonation": 0.714
         },
-        "latency_ms_p50": 0.39
+        "latency_ms_p50": 0.35
       },
       "spaced": {
         "n": 76,
@@ -582,7 +582,7 @@
           "recruiter_scam": 0.0,
           "support_impersonation": 0.714
         },
-        "latency_ms_p50": 0.37
+        "latency_ms_p50": 0.35
       },
       "synonym": {
         "n": 76,
@@ -598,7 +598,7 @@
           "recruiter_scam": 0.0,
           "support_impersonation": 0.714
         },
-        "latency_ms_p50": 0.39
+        "latency_ms_p50": 0.36
       },
       "injection": {
         "n": 46,
@@ -614,7 +614,7 @@
           "recruiter_scam": 0.0,
           "support_impersonation": 0.714
         },
-        "latency_ms_p50": 0.41
+        "latency_ms_p50": 0.38
       },
       "link_homoglyph": {
         "n": 46,
@@ -630,7 +630,7 @@
           "recruiter_scam": 0.0,
           "support_impersonation": 0.929
         },
-        "latency_ms_p50": 0.44
+        "latency_ms_p50": 0.38
       },
       "link_subdomain": {
         "n": 46,
@@ -646,7 +646,7 @@
           "recruiter_scam": 0.0,
           "support_impersonation": 1.0
         },
-        "latency_ms_p50": 0.42
+        "latency_ms_p50": 0.38
       },
       "sender_homoglyph": {
         "n": 46,
@@ -662,7 +662,7 @@
           "recruiter_scam": 1.0,
           "support_impersonation": 1.0
         },
-        "latency_ms_p50": 0.42
+        "latency_ms_p50": 0.37
       }
     },
     "L1+L2+L3": {
@@ -680,7 +680,7 @@
           "recruiter_scam": 1.0,
           "support_impersonation": 1.0
         },
-        "latency_ms_p50": 0.73
+        "latency_ms_p50": 0.67
       },
       "homoglyph": {
         "n": 76,
@@ -696,7 +696,7 @@
           "recruiter_scam": 1.0,
           "support_impersonation": 1.0
         },
-        "latency_ms_p50": 0.74
+        "latency_ms_p50": 0.69
       },
       "zero_width": {
         "n": 76,
@@ -712,7 +712,7 @@
           "recruiter_scam": 1.0,
           "support_impersonation": 1.0
         },
-        "latency_ms_p50": 0.73
+        "latency_ms_p50": 0.66
       },
       "leet": {
         "n": 76,
@@ -728,7 +728,7 @@
           "recruiter_scam": 1.0,
           "support_impersonation": 1.0
         },
-        "latency_ms_p50": 0.75
+        "latency_ms_p50": 0.7
       },
       "spaced": {
         "n": 76,
@@ -744,7 +744,7 @@
           "recruiter_scam": 1.0,
           "support_impersonation": 1.0
         },
-        "latency_ms_p50": 0.88
+        "latency_ms_p50": 0.78
       },
       "synonym": {
         "n": 76,
@@ -760,7 +760,7 @@
           "recruiter_scam": 1.0,
           "support_impersonation": 1.0
         },
-        "latency_ms_p50": 0.73
+        "latency_ms_p50": 0.66
       },
       "injection": {
         "n": 46,
@@ -776,7 +776,7 @@
           "recruiter_scam": 1.0,
           "support_impersonation": 1.0
         },
-        "latency_ms_p50": 0.95
+        "latency_ms_p50": 0.87
       },
       "link_homoglyph": {
         "n": 46,
@@ -792,7 +792,7 @@
           "recruiter_scam": 1.0,
           "support_impersonation": 1.0
         },
-        "latency_ms_p50": 0.8
+        "latency_ms_p50": 0.69
       },
       "link_subdomain": {
         "n": 46,
@@ -808,7 +808,7 @@
           "recruiter_scam": 1.0,
           "support_impersonation": 1.0
         },
-        "latency_ms_p50": 0.81
+        "latency_ms_p50": 0.75
       },
       "sender_homoglyph": {
         "n": 46,
@@ -824,7 +824,7 @@
           "recruiter_scam": 1.0,
           "support_impersonation": 1.0
         },
-        "latency_ms_p50": 0.77
+        "latency_ms_p50": 0.73
       }
     }
   },
