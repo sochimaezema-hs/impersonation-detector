@@ -78,3 +78,9 @@ def test_cli_smoke(tmp_path, capsys):
     assert (tmp_path / "benchmark_rule.md").exists()
     assert main(["export-seed", "-p", "handshake.com", "-p", "Handshake", "--out", str(tmp_path / "s.jsonl")]) == 0
     assert len((tmp_path / "s.jsonl").read_text().splitlines()) == 76
+
+
+def test_benchmark_dump_records():
+    dump: list[dict] = []
+    run_benchmark(PROTECTED, variants=["clean"], configs=["L3"], dump=dump)
+    assert len(dump) == 76 and {"id", "label", "flagged", "intent", "confidence", "action"} <= set(dump[0])

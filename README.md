@@ -102,8 +102,10 @@ their job is the sender, Layer 3's is the request.
 
 What the benchmark already shows:
 
-- **UTS #39 has gaps.** Cyrillic `т` and Greek `κ` have no Latin confusable mapping, so a
-  skeleton-only detector misses `hаndsһaκe`; the mixed-script feature in Layer 2 closes it.
+- **UTS #39 has gaps.** Cyrillic `т` and Greek `κ` map to non-ASCII Latin prototypes
+  (U+1D1B, U+0138), not to `t` and `k`, so a skeleton-only detector does not match
+  `hаndsһaκe` to `handshake` by skeleton equality; the mixed-script feature in Layer 2
+  and the edit-distance check close it.
 - **Regex cues die on cheap obfuscation.** Before confusable folding and de-spacing the rule
   baseline lost 37 points of recall to one swapped glyph; after, 2.
 - **Negation matters.** "Never send bank details by email" from a real employer must not be

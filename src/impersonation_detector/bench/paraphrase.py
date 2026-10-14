@@ -32,7 +32,10 @@ def paraphrase_items(items: list[SeedItem], backend: Backend, n: int = 1) -> lis
     for item in items:
         for k in range(n):
             try:
-                text = backend.complete("You rewrite text faithfully.", PROMPT.format(body=item.body)).strip()
+                text = backend.complete("You rewrite text faithfully.", PROMPT.format(body=item.body),
+                                        json_mode=False).strip()
+                if text.startswith("{") and text.endswith("}"):
+                    continue  # a JSON-mode backend answered; not a paraphrase
             except BackendError as exc:
                 raise SystemExit(f"paraphrase failed on {item.id}: {exc}") from exc
             if not text:

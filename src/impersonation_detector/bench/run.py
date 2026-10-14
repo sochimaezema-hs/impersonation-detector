@@ -140,7 +140,10 @@ def _flagged(cfg: str, v: Verdict) -> bool:
 
 def run_benchmark(protected: list[str], intent: RuleIntentClassifier | LLMIntentClassifier | None = None,
                   variants: list[str] | None = None, configs: list[str] | None = None,
-                  seed: int = 0, items: list[SeedItem] | None = None) -> Report:
+                  seed: int = 0, items: list[SeedItem] | None = None,
+                  dump: list[dict] | None = None) -> Report:
+    """``dump``, if given, receives one record per (config, variant, message) with the
+    verdict, so operating points and false positives can be analysed offline."""
     items = items if items is not None else load_seed(protected)
     brand = min(brand_tokens(protected))
     intent = intent or RuleIntentClassifier()
@@ -170,6 +173,15 @@ def run_benchmark(protected: list[str], intent: RuleIntentClassifier | LLMIntent
                 verdict = detectors[cfg].analyze(msg)
                 cell.latency_ms.append((time.perf_counter() - t0) * 1000)
                 flag = _flagged(cfg, verdict)
+                if dump is not None:
+                    dump.append({"config": cfg, "variant": vname, "id": item.id, "label": item.label,
+                                 "flagged": flag, "risk": round(verdict.risk, 4), "action": verdict.action,
+                                 "intent": None if verdict.intent is None else verdict.intent.label,
+                                 "confidence": None if verdict.intent is None else round(verdict.intent.confidence, 3),
+                                 "signals": [] if verdict.intent is None else list(verdict.intent.signals),
+                                 "rationale": "" if verdict.intent is None else verdict.intent.rationale,
+                                 "sender_p": None if verdict.sender_score is None else round(verdict.sender_score.probability, 4),
+                                 "reasons": verdict.reasons})
                 if verdict.intent is not None and verdict.intent.label == "unknown":
                     cell.unknown += 1
                 if malicious:

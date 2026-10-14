@@ -27,7 +27,8 @@ from .skeleton import skeleton
 def _intent(args) -> RuleIntentClassifier | LLMIntentClassifier:
     if not args.backend or args.backend == "rule":
         return RuleIntentClassifier()
-    return LLMIntentClassifier(make_backend(args.backend, args.model))
+    return LLMIntentClassifier(make_backend(args.backend, args.model),
+                               cache_path=getattr(args, "cache", None))
 
 
 def _add_protected(p: argparse.ArgumentParser) -> None:
@@ -39,6 +40,8 @@ def _add_backend(p: argparse.ArgumentParser) -> None:
     p.add_argument("--backend", default="rule",
                    help="Layer 3 backend: rule (default), ollama[:host], openai[:base_url], anthropic")
     p.add_argument("--model", default=None, help="model name for the chosen backend")
+    p.add_argument("--cache", default=None,
+                   help="JSONL file caching LLM responses per message (reruns cost nothing)")
 
 
 def _read_messages(path: str) -> list[Message]:
@@ -94,8 +97,11 @@ def main(argv: list[str] | None = None) -> int:
     be.add_argument("--variants", default=None, help="comma-separated subset of variants")
     be.add_argument("--configs", default=None, help="comma-separated subset of layer configs")
     be.add_argument("--seed", type=int, default=0)
+    be.add_argument("--dump", default=None, help="write one JSONL record per (config, variant, message)")
     be.add_argument("--extra", action="append", default=[],
                     help="JSONL of extra messages (e.g. LLM paraphrases) appended to the corpus")
+    be.add_argument("--only-extra", action="store_true",
+                    help="benchmark the --extra messages alone (out-of-sample), not seed + extra")
 
     pa = sub.add_parser("paraphrase", help="generate out-of-sample paraphrases of the seed corpus with an LLM")
     _add_protected(pa)
@@ -200,14 +206,19 @@ def main(argv: list[str] | None = None) -> int:
         if args.extra:
             from .bench import load_seed
             from .bench.paraphrase import read_items
-            items = load_seed(args.protected)
+            items = [] if args.only_extra else load_seed(args.protected)
             for path in args.extra:
                 items += read_items(Path(path))
+        dump: list[dict] | None = [] if args.dump else None
         rep = run_benchmark(args.protected, intent=_intent(args),
                             variants=args.variants.split(",") if args.variants else None,
                             configs=args.configs.split(",") if args.configs else None,
-                            seed=args.seed, items=items)
+                            seed=args.seed, items=items, dump=dump)
         j, m = write_report(rep, Path(args.out))
+        if dump is not None:
+            Path(args.dump).parent.mkdir(parents=True, exist_ok=True)
+            Path(args.dump).write_text("".join(json.dumps(d, ensure_ascii=False) + "\n" for d in dump), encoding="utf-8")
+            print(f"wrote {args.dump}", file=sys.stderr)
         print(rep.to_markdown())
         print(f"wrote {j}\nwrote {m}", file=sys.stderr)
         return 0

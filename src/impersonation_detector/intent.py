@@ -297,7 +297,7 @@ class RuleIntentClassifier:
 class Backend(Protocol):
     name: str
 
-    def complete(self, system: str, user: str) -> str: ...
+    def complete(self, system: str, user: str, json_mode: bool = True) -> str: ...
 
 
 SYSTEM_PROMPT = """You are a security classifier for messages sent to users of an online platform.
@@ -373,11 +373,51 @@ def _parse_output(text: str) -> dict | None:
 class LLMIntentClassifier:
     """Message-intent classification with a language model, hardened per OWASP LLM01."""
 
-    def __init__(self, backend: Backend, retries: int = 1, cache: bool = True) -> None:
+    def __init__(self, backend: Backend, retries: int = 1, cache: bool = True,
+                 cache_path: str | os.PathLike | None = None) -> None:
         self.backend = backend
         self.retries = retries
         self.name = f"llm:{backend.name}"
-        self._cache: dict[tuple, IntentResult] | None = {} if cache else None
+        self._cache: dict[tuple, IntentResult] | None = {} if cache or cache_path else None
+        self.cache_path = cache_path
+        if cache_path:
+            self._load_cache()
+
+    # -- persistent cache: one JSON line per (backend, message) so benchmark reruns are free
+    def _cache_key(self, msg: Message) -> tuple:
+        return (self.backend.name, msg.sender_name, msg.sender_address, msg.subject, msg.body,
+                tuple(msg.links), msg.context)
+
+    def _load_cache(self) -> None:
+        import pathlib
+        path = pathlib.Path(self.cache_path)
+        if not path.exists() or self._cache is None:
+            return
+        for line in path.read_text(encoding="utf-8").splitlines():
+            if not line.strip():
+                continue
+            try:
+                row = json.loads(line)
+                key = tuple(tuple(k) if isinstance(k, list) else k for k in row["key"])
+                r = row["result"]
+                self._cache[key] = IntentResult(r["label"], r["confidence"], tuple(r["signals"]),
+                                                r.get("rationale", ""), r.get("backend", self.name),
+                                                r.get("raw", ""))
+            except (KeyError, TypeError, ValueError, json.JSONDecodeError):
+                continue
+
+    def _append_cache(self, key: tuple, result: IntentResult) -> None:
+        if not self.cache_path:
+            return
+        import pathlib
+        path = pathlib.Path(self.cache_path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps({"key": [list(k) if isinstance(k, tuple) else k for k in key],
+                                 "result": {"label": result.label, "confidence": result.confidence,
+                                            "signals": list(result.signals), "rationale": result.rationale,
+                                            "backend": result.backend, "raw": result.raw}},
+                                ensure_ascii=False) + "\n")
 
     def build_prompt(self, msg: Message, nonce: str) -> tuple[str, str]:
         body = _normalize(msg.body)
@@ -396,12 +436,13 @@ class LLMIntentClassifier:
         return system, user
 
     def classify(self, msg: Message) -> IntentResult:
-        key = (msg.sender_name, msg.sender_address, msg.subject, msg.body, msg.links, msg.context)
+        key = self._cache_key(msg)
         if self._cache is not None and key in self._cache:
             return self._cache[key]
         result = self._classify(msg)
         if self._cache is not None and result.label != UNKNOWN:
             self._cache[key] = result
+            self._append_cache(key, result)
         return result
 
     def _classify(self, msg: Message) -> IntentResult:
@@ -475,12 +516,15 @@ class OllamaBackend:
         self.timeout = timeout
         self.name = f"ollama/{model}"
 
-    def complete(self, system: str, user: str) -> str:
-        out = _post_json(f"{self.host}/api/chat", {
-            "model": self.model, "stream": False, "format": "json",
-            "options": {"temperature": 0, "num_predict": 300},
+    def complete(self, system: str, user: str, json_mode: bool = True) -> str:
+        payload = {
+            "model": self.model, "stream": False,
+            "options": {"temperature": 0, "num_predict": 300 if json_mode else 600},
             "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
-        }, {}, self.timeout)
+        }
+        if json_mode:
+            payload["format"] = "json"
+        out = _post_json(f"{self.host}/api/chat", payload, {}, self.timeout)
         return str(out.get("message", {}).get("content", ""))
 
 
@@ -495,10 +539,10 @@ class OpenAICompatibleBackend:
         self.timeout = timeout
         self.name = f"openai-compat/{model}"
 
-    def complete(self, system: str, user: str) -> str:
+    def complete(self, system: str, user: str, json_mode: bool = True) -> str:
         headers = {"Authorization": f"Bearer {self.api_key}"} if self.api_key else {}
         out = _post_json(f"{self.base_url}/chat/completions", {
-            "model": self.model, "temperature": 0, "max_tokens": 300,
+            "model": self.model, "temperature": 0, "max_tokens": 300 if json_mode else 600,
             "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
         }, headers, self.timeout)
         try:
@@ -517,11 +561,11 @@ class AnthropicBackend:
         self.timeout = timeout
         self.name = f"anthropic/{model}"
 
-    def complete(self, system: str, user: str) -> str:
+    def complete(self, system: str, user: str, json_mode: bool = True) -> str:
         if not self.api_key:
             raise BackendError("ANTHROPIC_API_KEY is not set")
         out = _post_json("https://api.anthropic.com/v1/messages", {
-            "model": self.model, "max_tokens": 300, "temperature": 0, "system": system,
+            "model": self.model, "max_tokens": 300 if json_mode else 600, "temperature": 0, "system": system,
             "messages": [{"role": "user", "content": user}],
         }, {"x-api-key": self.api_key, "anthropic-version": "2023-06-01"}, self.timeout)
         try:
@@ -539,7 +583,7 @@ class StaticBackend:
         self.replies = list(replies) or ["{}"]
         self.calls: list[tuple[str, str]] = []
 
-    def complete(self, system: str, user: str) -> str:
+    def complete(self, system: str, user: str, json_mode: bool = True) -> str:
         self.calls.append((system, user))
         i = min(len(self.calls) - 1, len(self.replies) - 1)
         return self.replies[i]

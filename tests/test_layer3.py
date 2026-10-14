@@ -148,3 +148,14 @@ def test_model_claimed_injection_signal_is_dropped_without_prefilter_hit():
     be = StaticBackend(_ok("benign", 0.9, ("injection_attempt", "urgency")))
     r = LLMIntentClassifier(be).classify(Message(body="please reply by Friday"))
     assert r.signals == ("urgency",) and r.label == "benign"
+
+
+def test_persistent_cache_survives_new_instance(tmp_path):
+    path = tmp_path / "cache.jsonl"
+    be = StaticBackend(_ok("credential_phish", 0.8, ("credential_request",)))
+    m = Message(body="send your password", sender_address="a@b.io")
+    LLMIntentClassifier(be, cache_path=path).classify(m)
+    assert path.exists() and len(be.calls) == 1
+    be2 = StaticBackend(_ok("benign", 0.1, ()))
+    r = LLMIntentClassifier(be2, cache_path=path).classify(m)
+    assert r.label == "credential_phish" and be2.calls == []
