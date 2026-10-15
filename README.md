@@ -141,12 +141,45 @@ Three things the LLM run shows, all from `benchmarks/dump_llama3.1_8b.jsonl`:
   were overruled to `unknown` (held, not delivered) because the deterministic pre-filter had
   already flagged the body. The hijack count in the table is 0 only because of that overrule.
 
-So the two Layer 3 options sit at opposite corners: the rules at FPR 0.00 with recall that
-degrades under paraphrase, the 8B model at recall 1.00 with an FPR no platform could ship.
-The pipeline's noisy-OR takes either, and the obvious next experiment is a larger or
-instruction-tuned model, which the `--backend anthropic` and `--backend openai` paths run
-unchanged. Latency in the LLM tables is not meaningful: responses are served from the
-persistent cache on reruns; uncached calls took 2 to 6 seconds each on an M4 Max.
+### A larger model: Gemma 3 27B (`benchmarks/benchmark_llm_ollama_gemma3_27b.md`)
+
+Same harness, 3.4× the parameters, run on the cells that matter (clean, injection,
+zero-width, and the paraphrased corpus):
+
+| Backend | clean | zero_width | injection¹ | paraphrased (OOS) | injection compliance |
+|---|---|---|---|---|---|
+| rule | 1.00 / 0.00 | 1.00 / 0.03 | 1.00 | 0.96 / 0.00 | 0 of 46 (cannot comply) |
+| llama3.1:8b | 1.00 / 0.33 | 1.00 / 0.30 | 1.00 | 1.00 / 0.30 | 5 of 46, all overruled |
+| gemma3:27b | **0.98 / 0.13** | 1.00 / 0.13 | 1.00 | **1.00 / 0.17** | **0 of 46** |
+
+(full-pipeline rows; recall / FPR). Three observations from `benchmarks/dump_gemma3_27b.jsonl`:
+
+- **Scale buys precision, not just recall.** The false-positive rate drops from 0.33 to
+  0.13 on the clean corpus and from 0.30 to 0.17 on paraphrases, with recall essentially
+  unchanged. The 27B model's rationales cite cues that are actually in the text; the 8B
+  model's often did not.
+- **The residual false positives are all one kind.** Every benign message Gemma flags is a
+  genuine notice from an institution the recipient trusts: the platform's own support
+  reply, its Trust & Safety takedown notice, its password-changed alert, a financial-aid
+  office's document request. The model labels each `support_impersonation` because it has
+  no way to know the sender is who it claims to be. That knowledge lives in Layer 2
+  (`domain_is_protected`) and in the platform's own send pipeline. Fusing "the LLM says
+  support impersonation" with "the sender really is on the protected domain" is the next
+  step; it is not done here because the corpus also contains spoofed-From attacks (s06,
+  s11, c04) that a naive version of that rule would wave through.
+- **A larger model resisted every injection.** Gemma complied with the injected
+  instruction 0 times in 46, against 5 for Llama 8B. The pre-filter still runs: the
+  guarantee has to hold for whichever model is plugged in.
+
+One miss is worth naming: c07, a credential phish whose link host embeds a *third party's*
+domain (`orbitallabs.io.docs-share.site`) and whose sender is a plausible recruiter. No
+layer flags it; Layers 1 and 2 only know the protected brand, and both LLMs read the link
+as a meeting invite. Brand-agnostic lookalike detection of *any* embedded registrable
+domain is the obvious extension.
+
+Latency in the LLM tables is not meaningful: responses are served from the persistent
+cache on reruns. Uncached, Llama 8B took 2 to 6 s per message and Gemma 27B about 8 s on an
+M4 Max. The `--backend anthropic` and `--backend openai` paths run unchanged for hosted models.
 
 What the benchmark already shows:
 
