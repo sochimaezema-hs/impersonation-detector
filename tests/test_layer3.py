@@ -159,3 +159,28 @@ def test_persistent_cache_survives_new_instance(tmp_path):
     be2 = StaticBackend(_ok("benign", 0.1, ()))
     r = LLMIntentClassifier(be2, cache_path=path).classify(m)
     assert r.label == "credential_phish" and be2.calls == []
+
+
+def test_rule_survives_leet_i_ascii_confusables_and_wording_variants():
+    r = RuleIntentClassifier()
+    assert r.classify(Message(body="Open the document and 51gn 1n with your university cred3nt1a15 to view it: https://secure-portal.app/v")).label == "credential_phish"
+    assert r.classify(Message(body="Send the $500 depoѕit via Venrno to @campus-housing within 24 hoυrs or it will be released.", sender_name="Housing")).label == "payment_redirect"
+    assert r.classify(Message(body="buy three $100 Apple prepaid cards for a client and send me the codes. I'll reimburse you today.")).label == "payment_redirect"
+    assert r.classify(Message(body="Open the document and log on with your university credentials to view it: https://secure-portal.app/v")).label == "credential_phish"
+    m = Message(body="To complete the verification process, please enter the 6-digit code we recently sent to your phone. This code will only be valid for the next 10 minutes.",
+                sender_name="Handshake Support", sender_address="support@handshake.com",
+                sender_facts=("sender:platform-domain", "display:claims-platform-brand", "links:none"))
+    assert r.classify(m).label == "credential_phish"
+
+
+def test_paraphrase_refusals_are_retried_then_dropped():
+    from impersonation_detector.bench.paraphrase import is_refusal, paraphrase_items
+    from impersonation_detector.bench.seed import SeedItem
+    assert is_refusal("I cannot rewrite a message that requests personal identifiable information.")
+    assert not is_refusal("A warning has been issued regarding your account; confirm within a day.")
+    item = SeedItem("x1", "recruiter_scam", "A", "a@b.io", "", "send me your SSN and passport today")
+    be = StaticBackend("I can't help with that.", "Sorry, I cannot rewrite this.", "Please send your SSN and passport over today.")
+    out = paraphrase_items([item], be)
+    assert len(out) == 1 and out[0].body.startswith("Please send") and len(be.calls) == 3
+    be2 = StaticBackend("I can't help with that.")
+    assert paraphrase_items([item], be2) == []

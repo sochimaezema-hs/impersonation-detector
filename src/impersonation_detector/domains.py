@@ -25,6 +25,17 @@ _MULTI_SUFFIX = frozenset({
     "co.il", "com.my", "com.ph", "com.pk", "com.eg", "com.sa",
 })
 
+# Public TLDs common enough that their appearance as an *interior* label of a host
+# (``orbitallabs.io.docs-share.site``) signals an embedded-domain deception.
+KNOWN_TLDS = frozenset({
+    "com", "net", "org", "edu", "gov", "mil", "int", "io", "co", "ai", "app", "dev", "me", "us",
+    "uk", "ca", "de", "fr", "au", "in", "jp", "br", "nl", "se", "no", "es", "it", "ch", "ru", "cn",
+    "info", "biz", "xyz", "online", "site", "top", "club", "shop", "store", "tech", "cloud",
+    "live", "link", "click", "help", "support", "careers", "jobs", "work", "ly", "gl", "tv",
+})
+
+INSTITUTIONAL_TLDS = frozenset({"edu", "gov", "mil", "ac.uk", "edu.au", "ac.jp", "ac.in"})
+
 # Words a sender uses to claim an institutional role. Each one is a feature, not a verdict:
 # "careers@berkeley.edu" is benign; "Handshake Careers" <x@gmail.com> is not.
 ROLE_WORDS = frozenset({
@@ -56,6 +67,8 @@ _EMAIL = re.compile(
 )
 _LEET = str.maketrans({"0": "o", "1": "l", "3": "e", "4": "a", "5": "s", "7": "t", "8": "b",
                        "@": "a", "$": "s", "|": "l", "!": "i"})
+_LEET_I = str.maketrans({"0": "o", "1": "i", "3": "e", "4": "a", "5": "s", "7": "t", "8": "b",
+                         "@": "a", "$": "s", "|": "i", "!": "i"})
 
 
 def has_invisible(text: str) -> bool:
@@ -125,6 +138,17 @@ def unleet(text: str) -> str:
     return text.translate(_LEET)
 
 
+def unleet_i(text: str) -> str:
+    """Alternative reading with ``1`` as ``i`` (``51gn 1n`` → ``sign in``)."""
+    return text.translate(_LEET_I)
+
+
+def unconfuse_ascii(text: str) -> str:
+    """ASCII-only confusables UTS #39 folds the *other* way: ``rn`` → ``m``, ``vv`` → ``w``,
+    ``cl`` → ``d``. Used as an extra view for cue matching, never as the primary text."""
+    return text.replace("rn", "m").replace("RN", "M").replace("vv", "w").replace("VV", "W").replace("cl", "d")
+
+
 def brand_tokens(protected: list[str]) -> set[str]:
     """Identifying tokens of the protected names: ``{"handshake"}`` from
     ``["handshake.com", "Handshake Support"]``. Generic and role words are dropped."""
@@ -153,3 +177,26 @@ def parse_address(address: str) -> tuple[str, str, str]:
         name, local, domain = "", m.group(4), m.group(5)
     # The domain keeps invisible characters and punycode so features can flag them.
     return name.strip(), local.strip(), domain.strip().strip(".").casefold()
+
+
+def embedded_domain(host: str) -> str | None:
+    """A registrable domain hidden in the subdomain labels of *host*, brand-agnostic.
+
+    ``orbitallabs.io.docs-share.site`` → ``orbitallabs.io``; ``mail.google.com`` → None.
+    The rule: an interior label that is a public TLD, preceded by at least one label,
+    with the real registrable domain still to its right.
+    """
+    subs = subdomain_labels(host)
+    for i in range(1, len(subs)):
+        if subs[i] in KNOWN_TLDS and subs[i - 1] not in KNOWN_TLDS:
+            # prefer a two-level suffix (co.uk) when present
+            if i + 1 < len(subs) and f"{subs[i]}.{subs[i + 1]}" in _MULTI_SUFFIX:
+                return ".".join(subs[i - 1:i + 2])
+            return f"{subs[i - 1]}.{subs[i]}"
+    return None
+
+
+def is_institutional(host: str) -> bool:
+    """True for university / government registrable domains (``.edu``, ``.gov``, ``ac.uk``)."""
+    reg = registrable(host)
+    return any(reg == t or reg.endswith("." + t) for t in INSTITUTIONAL_TLDS)

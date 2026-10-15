@@ -14,6 +14,7 @@ from .domains import (
     FREE_MAIL,
     ROLE_WORDS,
     brand_tokens,
+    embedded_domain,
     has_invisible,
     parse_address,
     protected_domains,
@@ -36,6 +37,7 @@ FEATURE_NAMES: tuple[str, ...] = (
     "domain_tld_swap",
     "domain_brand_affix",
     "domain_brand_in_subdomain",
+    "domain_embeds_foreign_domain",
     "domain_leet_match",
     "domain_free_mail",
     "domain_missing",
@@ -131,6 +133,7 @@ class FeatureExtractor:
         f["domain_punycode"] = float("xn--" in raw.casefold())
         f["domain_mixed_script"] = float(is_mixed_script(reg))
         f["domain_free_mail"] = float(reg in FREE_MAIL)
+        f["domain_embeds_foreign_domain"] = float(embedded_domain(domain) is not None)
         if reg in self.domains:
             f["domain_is_protected"] = 1.0
             return f

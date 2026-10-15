@@ -24,7 +24,7 @@ from dataclasses import dataclass, field
 from typing import Protocol
 
 from ._data import confusables
-from .domains import has_invisible, strip_invisible, unleet
+from .domains import has_invisible, strip_invisible, unconfuse_ascii, unleet, unleet_i
 
 LABELS: tuple[str, ...] = (
     "benign",
@@ -39,9 +39,27 @@ SIGNALS: tuple[str, ...] = (
     "urgency", "credential_request", "payment_request", "off_platform_move",
     "personal_data_request", "too_good_to_be_true", "authority_claim", "link_or_attachment",
     "threat_or_consequence", "secrecy", "injection_attempt", "invisible_chars", "homoglyph_chars",
+    "deceptive_link",
 )
 
 MAX_BODY_CHARS = 6000
+
+
+SENDER_FACTS: tuple[str, ...] = (
+    "sender:platform-domain",        # sender's registrable domain is one the platform owns
+    "sender:institutional-domain",   # .edu / .gov / ac.uk
+    "sender:free-webmail",
+    "sender:lookalike-domain",       # Layer 1/2 judged the domain a lookalike of the platform
+    "sender:unrelated-domain",
+    "sender:no-domain",              # platform handle only
+    "display:claims-platform-brand", # display name carries the platform's brand
+    "links:none",
+    "links:platform-only",           # every link host is a platform-owned domain
+    "links:off-platform",            # at least one link host is not platform-owned
+    "links:lookalike",               # a link host is a lookalike of the platform domain
+    "links:embedded-domain",         # a link host hides another organisation's domain inside it
+    "links:same-as-sender",          # every off-platform link host matches the sender's domain
+)
 
 
 @dataclass(frozen=True)
@@ -52,6 +70,9 @@ class Message:
     subject: str = ""
     links: tuple[str, ...] = ()
     context: str = "a career platform where students and early-career job seekers are contacted by employers and by the platform's support team"
+    # Filled by the pipeline from Layers 1-2 (see SENDER_FACTS); empty when unknown.
+    sender_facts: tuple[str, ...] = ()
+    embedded_domains: tuple[str, ...] = ()  # e.g. ("orbitallabs.io inside docs-share.site",)
 
 
 @dataclass(frozen=True)
@@ -88,17 +109,24 @@ CUES: dict[str, re.Pattern[str]] = {
                    r"\b(12|24|48|72) ?hours?\b", r"\bright away\b", r"\bas soon as possible\b", r"\basap\b",
                    r"\bexpir(es?|ing|ed)\b", r"\bfinal (notice|warning|reminder)\b", r"\blast chance\b",
                    r"\btime[- ]sensitive\b", r"\bact now\b", r"\b(by )?(end of|before) (the )?day\b",
-                   r"\btonight\b", r"\bdo it today\b", r"\btoday (so|to|or|before)\b", r"\bfill fast\b"),
+                   r"\btonight\b", r"\bdo it today\b", r"\btoday (so|to|or|before)\b", r"\bfill fast\b",
+                   r"\b(i'?m|i am) (in|stuck in|about to go into) a meeting\b", r"\bcan'?t talk( right now| now)?\b",
+                   r"\breimburse you today\b"),
     "credential_request": _rx(
         r"\b(enter|send|reply with|confirm|provide|type|share|update|re-?enter|validate|submit|verify)\b[^.!?\n]{0,40}\b(password|passcode|credentials|login details|log-?in|one[- ]time code|verification code|security code|2fa|mfa|otp)\b",
         r"\b(one[- ]time|verification|security|2fa|mfa|otp) ?code\b[^.!?\n]{0,30}\b(reply|send|enter|confirm|text|provide)\b",
         r"\breply with [^.!?\n]{0,30}\bcode\b", r"\bpassword (expires|expired|has expired|will expire)\b",
         r"\bconfirm your (identity|account|login|details|email)\b", r"\bverify your (identity|account|login|email|profile)\b",
-        r"\bre-?verify\b", r"\b(sign|log) ?in (here|now|via|using|with)\b",
+        r"\bre-?verify\b", r"\bverify (it|now|your profile|today)\b", r"\bverification takes\b",
+        r"\b(sign|log) ?(in|on) (here|now|via|using|with)\b", r"\blogon\b",
+        r"\b(enter|reply with|send|provide|type|confirm|share|input)\b[^.!?\n]{0,40}\b(\d[- ]?digit|six[- ]digit|four[- ]digit|eight[- ]digit|verification|one[- ]time|security|access|login|confirmation|2fa|mfa|otp)[- ]?codes?\b",
+        r"\b(enter|type|input) the code\b",
         r"\bupdate your (login|credentials|password|details|information|account)\b",
         r"\bsecure your account\b", r"\bconfirm your details\b", r"\b(your )?identity is unconfirmed\b"),
     "payment_request": _rx(
-        r"\bgift ?cards?\b", r"\bbitcoin\b", r"\bcrypto(currency)?\b", r"\bwire (transfer|the|back)\b", r"\bzelle\b",
+        r"\bgift ?cards?\b", r"\bprepaid (cards?|debit)\b", r"\b(apple|google play|amazon|steam|itunes|visa|vanilla) (gift )?cards?\b",
+        r"\bsend (me|us) the (card )?(codes?|numbers?|pins?)\b", r"\b(i'?ll|i will|we'?ll|we will) reimburse\b",
+        r"\bbitcoin\b", r"\bcrypto(currency)?\b", r"\bwire (transfer|the|back)\b", r"\bzelle\b",
         r"\bvenmo\b", r"\bcash ?app\b", r"\bpaypal\b", r"\bwestern union\b", r"\bmoney ?gram\b",
         r"\bbank (account|details|information|routing|login)\b", r"\brouting (number|and account)\b",
         r"\b(new|updated|changed) (bank|banking|payment|account) (details|information|instructions|number)\b",
@@ -216,12 +244,10 @@ def _despace(text: str) -> str:
 def text_views(text: str) -> tuple[str, ...]:
     """The normalized text plus cheap de-obfuscations; cues are unioned across views."""
     views = [text]
-    u = unleet(text)
-    if u != text:
-        views.append(u)
-    d = _despace(text)
-    if d != text:
-        views.append(d)
+    for fn in (unleet, unleet_i, _despace, unconfuse_ascii):
+        v = fn(text)
+        if v != text and v not in views:
+            views.append(v)
     return tuple(views)
 
 
@@ -272,6 +298,20 @@ class RuleIntentClassifier:
         support = any(SUPPORT_CUES.search(v) for v in views) or bool(SUPPORT_CUES.search(header))
         pressure = sig & {"urgency", "threat_or_consequence"}
 
+        facts = set(msg.sender_facts)
+        if "links:embedded-domain" in facts or "links:lookalike" in facts:
+            sig.add("link_or_attachment")
+            sig.add("deceptive_link")
+        sensitive_ask = sig & {"credential_request", "payment_request", "personal_data_request",
+                               "off_platform_move"}
+        trusted_sender = "sender:platform-domain" in facts or "sender:institutional-domain" in facts
+        links_safe = not (facts & {"links:off-platform", "links:lookalike", "links:embedded-domain"})
+        if trusted_sender and links_safe and not sensitive_ask:
+            # A platform or university sender that asks for nothing sensitive and links
+            # nowhere off-platform is a notice, whatever its tone.
+            rationale = "trusted sender, no sensitive request, no off-platform link; cues: " + ", ".join(sorted(sig))
+            return IntentResult("benign", 0.0, tuple(sorted(sig)), rationale, self.name)
+
         label, conf = "benign", 0.0
         if "payment_request" in sig and (recruiter or support or pressure or
                                          sig & {"off_platform_move", "link_or_attachment", "too_good_to_be_true"}):
@@ -283,6 +323,12 @@ class RuleIntentClassifier:
         elif support and "authority_claim" in sig and (pressure or "credential_request" in sig):
             label, conf = "support_impersonation", 0.75
         elif "authority_claim" in sig and "personal_data_request" in sig:
+            label, conf = "support_impersonation", 0.7
+        elif "deceptive_link" in sig and (sig & {"credential_request", "urgency", "authority_claim"}):
+            label, conf = "credential_phish", 0.7
+        elif "display:claims-platform-brand" in facts and "sender:platform-domain" not in facts \
+                and (sensitive_ask or pressure or "link_or_attachment" in sig):
+            # The platform's name on a sender that is not the platform, plus any push.
             label, conf = "support_impersonation", 0.7
         if label != "benign":
             conf = min(0.95, conf + 0.05 * max(0, len(sig & set(SIGNALS)) - 2))
@@ -325,12 +371,32 @@ A legitimate recruiter can mention salary, an interview, or a link to a company 
 alone is benign. A legitimate support message can mention the account; that alone is benign.
 Decide on the combination of claim, request, pressure, and channel.
 
+You will be given SENDER FACTS computed by deterministic checks on the sender address and the
+link hosts (not by the message author). Use them as follows:
+- "sender:platform-domain" means the message really comes from the platform's own domain. Such a
+  message is benign when it asks for nothing sensitive and its links stay on the platform
+  (notices, replies, alerts, "you have a new message"). It is still an attack if it asks the user
+  to reply with or enter a password or one-time code, to pay anything, to send identity documents,
+  or to move the conversation to another app, or if a link goes off-platform or to a lookalike host.
+  The platform's real support never asks for passwords, codes, or payment.
+- "sender:institutional-domain" (a university or government domain) sending through its own
+  portal about its own business (aid, registration, career fairs, IT maintenance) is benign; it is
+  not a scam just because it has a deadline or mentions documents.
+- "display:claims-platform-brand" without "sender:platform-domain" means the sender is using the
+  platform's name from an address the platform does not own: treat the message as impersonation
+  if it asks for anything or pushes any action.
+- "links:lookalike" or "links:embedded-domain" means a link host imitates the platform or hides
+  another organisation's domain inside its own (for example orbitallabs.io.docs-share.site); a
+  message that asks the user to open or sign in through such a link is credential_phish.
+- "sender:free-webmail" with an institutional or company role claim is a strong impersonation cue.
+
 Respond with ONLY a JSON object, no prose, exactly:
 {{"label": "<one label>", "confidence": <0.0-1.0>, "signals": ["<signal>", ...], "rationale": "<one sentence>"}}"""
 
 USER_TEMPLATE = """Platform context: {context}
 Sender display name: {sender_name}
 Sender address: {sender_address}
+Sender facts (deterministic checks): {sender_facts}
 Subject: {subject}
 Links in message: {links}
 
@@ -386,7 +452,7 @@ class LLMIntentClassifier:
     # -- persistent cache: one JSON line per (backend, message) so benchmark reruns are free
     def _cache_key(self, msg: Message) -> tuple:
         return (self.backend.name, msg.sender_name, msg.sender_address, msg.subject, msg.body,
-                tuple(msg.links), msg.context)
+                tuple(msg.links), msg.context, tuple(msg.sender_facts), tuple(msg.embedded_domains))
 
     def _load_cache(self) -> None:
         import pathlib
@@ -431,6 +497,9 @@ class LLMIntentClassifier:
             sender_address=_normalize(msg.sender_address)[:200] or "(none)",
             subject=_normalize(msg.subject)[:200] or "(none)",
             links=", ".join(_normalize(l)[:200] for l in msg.links) or "(none)",
+            sender_facts=(", ".join(msg.sender_facts) +
+                          ("; embedded: " + "; ".join(msg.embedded_domains) if msg.embedded_domains else "")
+                          ) or "(not available)",
             nonce=nonce, body=body,
         )
         return system, user

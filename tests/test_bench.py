@@ -53,9 +53,11 @@ def test_paraphrase_roundtrip_and_extra_items(tmp_path):
     from impersonation_detector.intent import StaticBackend
 
     items = load_seed(PROTECTED)[:3]
-    be = StaticBackend("Rewritten text one.", "Rewritten text two.", "Rewritten text three.")
+    be = StaticBackend("Rewritten text number one, long enough.", "Rewritten text number two, long enough.",
+                       "Rewritten text number three, long enough.")
     para = paraphrase_items(items, be)
-    assert [p.body for p in para] == ["Rewritten text one.", "Rewritten text two.", "Rewritten text three."]
+    assert [p.body for p in para] == ["Rewritten text number one, long enough.", "Rewritten text number two, long enough.",
+                                      "Rewritten text number three, long enough."]
     assert para[0].label == items[0].label and "paraphrase" in para[0].tags
     path = tmp_path / "p.jsonl"
     write_items(para, path)

@@ -42,11 +42,34 @@ INJECTIONS = (
 _URL_HOST = re.compile(r"(https?://)([^\s/]+)", re.IGNORECASE)
 
 
+_URL_SPAN = re.compile(
+    r"(?:https?://|www\.)\S+"
+    r"|\b(?:[a-z0-9-]+\.)+(?:com|net|org|io|co|app|xyz|top|site|online|click|link|info|me|us|cc|live"
+    r"|help|support|careers|jobs|ly|edu|gov)\b(?:/\S*)?",
+    re.IGNORECASE,
+)
+
+
+def _outside_urls(text: str, fn: Callable[[str], str]) -> str:
+    """Apply *fn* to the text between URLs; URLs are left byte-for-byte unchanged, so a
+    body-text variant never turns the platform's own link into a lookalike."""
+    out, pos = [], 0
+    for m in _URL_SPAN.finditer(text):
+        out.append(fn(text[pos:m.start()]))
+        out.append(m.group(0))
+        pos = m.end()
+    out.append(fn(text[pos:]))
+    return "".join(out)
+
+
 def _word_mutate(text: str, words: tuple[str, ...], fn: Callable[[str, random.Random], str],
                  rng: random.Random) -> str:
-    for w in words:
-        text = re.sub(rf"\b{re.escape(w)}\b", lambda m: fn(m.group(0), rng), text, flags=re.IGNORECASE)
-    return text
+    def mutate(segment: str) -> str:
+        for w in words:
+            segment = re.sub(rf"\b{re.escape(w)}\b", lambda m: fn(m.group(0), rng), segment,
+                             flags=re.IGNORECASE)
+        return segment
+    return _outside_urls(text, mutate)
 
 
 def _homoglyph(word: str, rng: random.Random) -> str:
@@ -109,10 +132,11 @@ def v_spaced(item: SeedItem, rng: random.Random, brand: str) -> SeedItem:
 
 
 def v_synonym(item: SeedItem, rng: random.Random, brand: str) -> SeedItem:
-    body = item.body
-    for pat, rep in SYNONYMS.items():
-        body = re.sub(pat, rep, body, flags=re.IGNORECASE)
-    return replace(item, body=body)
+    def swap(segment: str) -> str:
+        for pat, rep in SYNONYMS.items():
+            segment = re.sub(pat, rep, segment, flags=re.IGNORECASE)
+        return segment
+    return replace(item, body=_outside_urls(item.body, swap))
 
 
 def v_injection(item: SeedItem, rng: random.Random, brand: str) -> SeedItem:
@@ -144,7 +168,7 @@ class Variant:
 
 VARIANTS: dict[str, Variant] = {v.name: v for v in (
     Variant("clean", v_clean, False, "unmodified seed message"),
-    Variant("homoglyph", v_homoglyph, False, "one confusable glyph in cue words, brand, link hosts"),
+    Variant("homoglyph", v_homoglyph, False, "one confusable glyph in cue words and brand (body text; URLs untouched)"),
     Variant("zero_width", v_zero_width, False, "zero-width space inside cue words and brand"),
     Variant("leet", v_leet, False, "digit substitutions in cue words"),
     Variant("spaced", v_spaced, False, "cue words letter-spaced"),

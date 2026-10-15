@@ -121,7 +121,7 @@ class SenderSynth:
             "homoglyph_domain", "homoglyph_domain", "typo_domain", "tld_swap", "affix_domain",
             "prefix_domain", "subdomain_embed", "leet_domain", "freemail_brand_display",
             "brand_display_evil_domain", "punycode_domain", "homoglyph_display", "invisible_chars",
-            "brand_local_evil_domain",
+            "brand_local_evil_domain", "foreign_embed", "foreign_embed",
         ))
         domain_based = technique in {
             "homoglyph_domain", "typo_domain", "tld_swap", "affix_domain", "prefix_domain",
@@ -168,6 +168,12 @@ class SenderSynth:
         elif technique == "invisible_chars":
             zw = rng.choice((chr(0x200B), chr(0x200C), chr(0x2060)))
             s = Sender(f"{title[:3]}{zw}{title[3:]} {role}", f"{local}@{dom.replace('.', zw + '.')}")
+        elif technique == "foreign_embed":
+            # brand-agnostic: some organisation's domain embedded in the attacker's host
+            co = rng.choice(OTHER_COMPANIES + tuple(self.brand_title.values()))
+            inner = _company_domain(co, rng) if co not in self.brand_title.values() else dom
+            first, last = rng.choice(PERSON_FIRST), rng.choice(PERSON_LAST)
+            s = Sender(f"{first} {last}", f"{first.lower()}.{last.lower()}@{inner}.{rng.choice(EVIL_DOMAINS)}")
         else:  # brand_local_evil_domain
             s = Sender(f"{rng.choice(PERSON_FIRST)} {rng.choice(PERSON_LAST)}",
                        f"{brand}-{local}@{rng.choice(EVIL_DOMAINS + FREE)}")
@@ -183,7 +189,7 @@ class SenderSynth:
         technique = rng.choice((
             "genuine_brand", "genuine_brand", "other_company", "other_company", "other_company",
             "person_freemail", "person_freemail", "university_office", "university_student",
-            "other_company_role", "person_company",
+            "other_company_role", "person_company", "deep_subdomain", "deep_subdomain",
         ))
         if technique == "genuine_brand":
             s = Sender(f"{title} {rng.choice(ROLE_NAMES)}", f"{rng.choice(ROLE_LOCALS)}@{dom}")
@@ -203,6 +209,12 @@ class SenderSynth:
         elif technique == "university_student":
             first, last = rng.choice(PERSON_FIRST), rng.choice(PERSON_LAST)
             s = Sender(f"{first} {last}", f"{first[0].lower()}{last.lower()}@{rng.choice(UNIVERSITIES)}")
+        elif technique == "deep_subdomain":
+            # legitimate multi-label hosts: mail.company.com, careers.school.edu
+            base = _company_domain(rng.choice(OTHER_COMPANIES), rng) if rng.random() < 0.6 else rng.choice(UNIVERSITIES)
+            sub = rng.choice(("mail", "careers", "jobs", "www", "app", "portal", "hr", "alumni", "cs", "mail.hr"))
+            first, last = rng.choice(PERSON_FIRST), rng.choice(PERSON_LAST)
+            s = Sender(f"{first} {last}", f"{first.lower()}@{sub}.{base}")
         else:  # person_company
             co = rng.choice(OTHER_COMPANIES)
             first, last = rng.choice(PERSON_FIRST), rng.choice(PERSON_LAST)

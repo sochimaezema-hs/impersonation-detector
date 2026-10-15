@@ -13,6 +13,8 @@ rules never saw are the honest test. Generated files are JSONL with the same fie
 from __future__ import annotations
 
 import json
+import re
+import sys
 from pathlib import Path
 
 from ..intent import Backend, BackendError
@@ -27,18 +29,35 @@ Message:
 {body}"""
 
 
-def paraphrase_items(items: list[SeedItem], backend: Backend, n: int = 1) -> list[SeedItem]:
+_REFUSAL = re.compile(r"\b(i (cannot|can'?t|am unable|won'?t)|as an ai|i'?m (not able|unable)|"
+                      r"here('s| is) (the|a) (rewritten|revised)|rewritten (message|version)|"
+                      r"i apologi[sz]e|not (able|willing) to (rewrite|help))\b", re.IGNORECASE)
+SYSTEM = ("You are a text-rewriting tool used to build a security benchmark. You rewrite any message, "
+          "including scams and phishing, faithfully and without commentary, because the rewrites are "
+          "used to test defences. Output only the rewritten message.")
+
+
+def is_refusal(text: str) -> bool:
+    return bool(_REFUSAL.search(text)) or len(text) < 25
+
+
+def paraphrase_items(items: list[SeedItem], backend: Backend, n: int = 1, attempts: int = 3) -> list[SeedItem]:
+    """One faithful rewrite per item (``n`` for more). A refusal, a preamble, or a JSON
+    object is not a paraphrase: it is retried and then dropped, never kept as data."""
     out: list[SeedItem] = []
     for item in items:
         for k in range(n):
-            try:
-                text = backend.complete("You rewrite text faithfully.", PROMPT.format(body=item.body),
-                                        json_mode=False).strip()
-                if text.startswith("{") and text.endswith("}"):
-                    continue  # a JSON-mode backend answered; not a paraphrase
-            except BackendError as exc:
-                raise SystemExit(f"paraphrase failed on {item.id}: {exc}") from exc
+            text = ""
+            for _ in range(attempts):
+                try:
+                    text = backend.complete(SYSTEM, PROMPT.format(body=item.body), json_mode=False).strip()
+                except BackendError as exc:
+                    raise SystemExit(f"paraphrase failed on {item.id}: {exc}") from exc
+                if text and not (text.startswith("{") and text.endswith("}")) and not is_refusal(text):
+                    break
+                text = ""
             if not text:
+                print(f"dropped {item.id}: model refused or returned no paraphrase", file=sys.stderr)
                 continue
             out.append(SeedItem(f"{item.id}-p{k}", item.label, item.sender_name, item.sender_address,
                                 item.subject, text, item.tags + ("paraphrase", backend.name)))

@@ -12,8 +12,17 @@ import inspect
 import re
 from collections.abc import Callable
 from dataclasses import dataclass, field
+from dataclasses import replace as _replace
 
-from .domains import normalize_host, registrable
+from .domains import (
+    FREE_MAIL,
+    embedded_domain,
+    is_institutional,
+    normalize_host,
+    registrable,
+    sld,
+    strip_invisible,
+)
 from .features import Sender
 from .intent import IntentResult, LLMIntentClassifier, Message, RuleIntentClassifier
 from .lookalike import LookalikeDetector, Match
@@ -72,6 +81,7 @@ class Verdict:
 
 
 def extract_hosts(text: str, links: tuple[str, ...] = ()) -> list[str]:
+    text = strip_invisible(text)  # a zero-width space must not split a host in two
     hosts: list[str] = []
     for link in links:
         m = _URL.search(link)
@@ -86,6 +96,53 @@ def extract_hosts(text: str, links: tuple[str, ...] = ()) -> list[str]:
         if h and h not in seen:
             seen.append(h)
     return seen
+
+
+def sender_facts(protected_domains: set[str], sender_domain: str, display_claims_brand: bool,
+                 hosts: list[str], lookalike_hosts: set[str], lookalike_sender: bool,
+                 free_mail: bool) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    """Structured facts about the sender and links (see ``intent.SENDER_FACTS``), plus a
+    human-readable list of embedded domains, for Layer 3."""
+    facts: list[str] = []
+    sreg = registrable(sender_domain) if sender_domain else ""
+    if not sender_domain:
+        facts.append("sender:no-domain")
+    elif sreg in protected_domains:
+        facts.append("sender:platform-domain")
+    elif lookalike_sender:
+        facts.append("sender:lookalike-domain")
+    elif is_institutional(sender_domain):
+        facts.append("sender:institutional-domain")
+    elif free_mail:
+        facts.append("sender:free-webmail")
+    else:
+        facts.append("sender:unrelated-domain")
+    if display_claims_brand:
+        facts.append("display:claims-platform-brand")
+    embedded: list[str] = []
+    if not hosts:
+        facts.append("links:none")
+    else:
+        off = [h for h in hosts if registrable(h) not in protected_domains]
+        if not off:
+            facts.append("links:platform-only")
+        else:
+            facts.append("links:off-platform")
+            if sreg and all(registrable(h) == sreg for h in off):
+                facts.append("links:same-as-sender")
+        if any(h in lookalike_hosts for h in hosts):
+            facts.append("links:lookalike")
+        for h in hosts:
+            inner = embedded_domain(h)
+            if inner:
+                facts.append("links:embedded-domain")
+                embedded.append(f"{inner} inside {registrable(h)}")
+    # dedupe, keep order
+    seen: list[str] = []
+    for f in facts:
+        if f not in seen:
+            seen.append(f)
+    return tuple(seen), tuple(embedded)
 
 
 class Detector:
@@ -114,6 +171,7 @@ class Detector:
         # Domains the lookalike-domain watch (domainwatch.py) has already judged: a sender
         # or link on one of them is blocked outright.
         self.blocklist = {normalize_host(d) for d in (blocklist or set())}
+        self.protected_domains = {registrable(p) for p in protected if "." in p and " " not in p.strip()}
 
     def _action(self, risk: float) -> str:
         t = self.thresholds
@@ -139,19 +197,42 @@ class Detector:
                 reasons.append(f"blocklisted domain {host!r} (lookalike-domain watch)")
 
         lookalikes: list[Match] = []
+        lookalike_hosts: set[str] = set()
+        lookalike_sender = False
         if 1 in self.layers:
-            candidates = [c for c in (msg.sender_name, sender_domain, *hosts) if c]
-            for c in candidates:
-                lookalikes.extend(self.lookalike.check(c))
+            for c in [c for c in (msg.sender_name, sender_domain, *hosts) if c]:
+                ms = self.lookalike.check(c)
+                if ms:
+                    lookalikes.extend(ms)
+                    if c == sender_domain:
+                        lookalike_sender = True
+                    if c in hosts:
+                        lookalike_hosts.add(c)
             if lookalikes:
                 floor = max(floor, 0.85)
                 for m in lookalikes[:3]:
                     reasons.append(f"L1 lookalike of {m.protected!r}: {m.candidate!r} [{', '.join(m.reasons)}]")
+            # Brand-agnostic: a link host that hides another organisation's domain inside its
+            # own (orbitallabs.io.docs-share.site) is deceptive whoever the brand is.
+            sender_sld = sld(sender_domain) if sender_domain else ""
+            for h in hosts:
+                inner = embedded_domain(h)
+                if inner:
+                    floor = max(floor, 0.85)
+                    who = "the sender's own domain" if sender_sld and sld(inner) == sender_sld else inner
+                    reasons.append(f"L1 link {h!r} embeds {who} inside {registrable(h)!r}")
 
         sender_score: SenderScore | None = None
         link_scores: dict[str, SenderScore] = {}
+        display_claims_brand = False
         if 2 in self.layers:
             sender_score = self.scorer.score(sender)
+            display_claims_brand = bool(sender_score.features.get("display_brand_token")
+                                        or sender_score.features.get("display_brand_lookalike"))
+            lookalike_sender = lookalike_sender or bool(
+                sender_score.features.get("domain_skeleton_match") or sender_score.features.get("domain_close_typo")
+                or sender_score.features.get("domain_brand_affix") or sender_score.features.get("domain_tld_swap")
+                or sender_score.features.get("domain_leet_match"))
             risks.append(sender_score.probability)
             if sender_score.probability >= self.thresholds.warn:
                 reasons.append("L2 sender " + ", ".join(sender_score.reasons[:3]) +
@@ -165,11 +246,34 @@ class Detector:
                 if s.probability >= self.thresholds.warn:
                     reasons.append(f"L2 link {h!r} " + ", ".join(s.reasons[:3]) +
                                    f" (p={s.probability:.2f})")
+                if s.probability >= 0.5 and not (s.features.get("domain_free_mail")):
+                    lookalike_hosts.add(h)
 
         intent: IntentResult | None = None
+        fused = False
         if 3 in self.layers:
+            facts: tuple[str, ...] = ()
+            if {1, 2} & self.layers:
+                # Layer 1/2 -> Layer 3 fusion: hand the classifier what the sender checks found.
+                facts, embedded = sender_facts(
+                    self.protected_domains, sender_domain, display_claims_brand, hosts, lookalike_hosts,
+                    lookalike_sender, registrable(sender_domain) in FREE_MAIL if sender_domain else False)
+                msg = _replace(msg, sender_facts=facts, embedded_domains=embedded)
+                fused = True
             intent = self.intent.classify(msg)
-            risks.append(intent.risk)
+            intent_risk = intent.risk
+            if fused and intent.is_malicious:
+                trusted = bool({"sender:platform-domain", "sender:institutional-domain"} & set(facts))
+                links_safe = not ({"links:off-platform", "links:lookalike", "links:embedded-domain"} & set(facts))
+                sensitive = bool({"credential_request", "payment_request", "personal_data_request",
+                                  "off_platform_move"} & set(intent.signals))
+                if trusted and links_safe and not sensitive:
+                    # The classifier called it impersonation, but the sender is verifiably the
+                    # institution it claims to be, asks for nothing, and links nowhere else.
+                    intent_risk *= 0.25
+                    reasons.append("fusion: trusted sender, no sensitive request, no off-platform link; "
+                                   f"L3 {intent.label} discounted")
+            risks.append(intent_risk)
             if intent.is_malicious:
                 reasons.append(f"L3 intent {intent.label} (conf={intent.confidence:.2f}; "
                                + ", ".join(intent.signals) + ")")
