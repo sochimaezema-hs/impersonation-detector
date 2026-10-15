@@ -4,60 +4,60 @@
       "recall": 0.978,
       "fpr": 0.0,
       "per_class_recall": {
-        "credential_phish": 1.0,
+        "credential_phish": 0.9,
         "payment_redirect": 1.0,
         "recruiter_scam": 1.0,
-        "support_impersonation": 0.929
+        "support_impersonation": 1.0
       }
     },
     "homoglyph": {
-      "recall": 0.957,
+      "recall": 0.978,
       "fpr": 0.0,
       "per_class_recall": {
-        "credential_phish": 1.0,
-        "payment_redirect": 0.875,
+        "credential_phish": 0.9,
+        "payment_redirect": 1.0,
         "recruiter_scam": 1.0,
-        "support_impersonation": 0.929
+        "support_impersonation": 1.0
       }
     },
     "zero_width": {
       "recall": 0.978,
       "fpr": 0.0,
       "per_class_recall": {
-        "credential_phish": 1.0,
+        "credential_phish": 0.9,
         "payment_redirect": 1.0,
         "recruiter_scam": 1.0,
-        "support_impersonation": 0.929
+        "support_impersonation": 1.0
       }
     },
     "leet": {
-      "recall": 0.826,
+      "recall": 0.978,
       "fpr": 0.0,
       "per_class_recall": {
-        "credential_phish": 0.7,
-        "payment_redirect": 0.875,
+        "credential_phish": 0.9,
+        "payment_redirect": 1.0,
         "recruiter_scam": 1.0,
-        "support_impersonation": 0.714
+        "support_impersonation": 1.0
       }
     },
     "spaced": {
       "recall": 0.978,
       "fpr": 0.0,
       "per_class_recall": {
-        "credential_phish": 1.0,
+        "credential_phish": 0.9,
         "payment_redirect": 1.0,
         "recruiter_scam": 1.0,
-        "support_impersonation": 0.929
+        "support_impersonation": 1.0
       }
     },
     "synonym": {
-      "recall": 0.891,
+      "recall": 0.957,
       "fpr": 0.0,
       "per_class_recall": {
-        "credential_phish": 0.8,
-        "payment_redirect": 0.875,
+        "credential_phish": 0.9,
+        "payment_redirect": 1.0,
         "recruiter_scam": 1.0,
-        "support_impersonation": 0.857
+        "support_impersonation": 0.929
       }
     }
   },
@@ -66,18 +66,18 @@
       "recall": 0.978,
       "fpr": 0.0,
       "per_class_recall": {
-        "credential_phish": 1.0,
+        "credential_phish": 0.9,
         "payment_redirect": 1.0,
         "recruiter_scam": 1.0,
-        "support_impersonation": 0.929
+        "support_impersonation": 1.0
       }
     },
     "homoglyph": {
-      "recall": 0.609,
+      "recall": 0.652,
       "fpr": 0.0,
       "per_class_recall": {
         "credential_phish": 0.3,
-        "payment_redirect": 0.75,
+        "payment_redirect": 1.0,
         "recruiter_scam": 0.929,
         "support_impersonation": 0.429
       }
@@ -86,40 +86,40 @@
       "recall": 0.978,
       "fpr": 0.0,
       "per_class_recall": {
-        "credential_phish": 1.0,
+        "credential_phish": 0.9,
         "payment_redirect": 1.0,
         "recruiter_scam": 1.0,
-        "support_impersonation": 0.929
+        "support_impersonation": 1.0
       }
     },
     "leet": {
-      "recall": 0.826,
+      "recall": 0.978,
       "fpr": 0.0,
       "per_class_recall": {
-        "credential_phish": 0.7,
-        "payment_redirect": 0.875,
+        "credential_phish": 0.9,
+        "payment_redirect": 1.0,
         "recruiter_scam": 1.0,
-        "support_impersonation": 0.714
+        "support_impersonation": 1.0
       }
     },
     "spaced": {
       "recall": 0.978,
       "fpr": 0.0,
       "per_class_recall": {
-        "credential_phish": 1.0,
+        "credential_phish": 0.9,
         "payment_redirect": 1.0,
         "recruiter_scam": 1.0,
-        "support_impersonation": 0.929
+        "support_impersonation": 1.0
       }
     },
     "synonym": {
-      "recall": 0.891,
+      "recall": 0.957,
       "fpr": 0.0,
       "per_class_recall": {
-        "credential_phish": 0.8,
-        "payment_redirect": 0.875,
+        "credential_phish": 0.9,
+        "payment_redirect": 1.0,
         "recruiter_scam": 1.0,
-        "support_impersonation": 0.857
+        "support_impersonation": 0.929
       }
     }
   },
@@ -128,40 +128,40 @@
       "recall": 0.978,
       "fpr": 0.0,
       "per_class_recall": {
-        "credential_phish": 1.0,
+        "credential_phish": 0.9,
         "payment_redirect": 1.0,
         "recruiter_scam": 1.0,
-        "support_impersonation": 0.929
+        "support_impersonation": 1.0
       }
     },
     "homoglyph": {
       "recall": 0.957,
       "fpr": 0.0,
       "per_class_recall": {
-        "credential_phish": 1.0,
+        "credential_phish": 0.9,
         "payment_redirect": 0.875,
         "recruiter_scam": 1.0,
-        "support_impersonation": 0.929
+        "support_impersonation": 1.0
       }
     },
     "zero_width": {
       "recall": 0.978,
       "fpr": 0.0,
       "per_class_recall": {
-        "credential_phish": 1.0,
+        "credential_phish": 0.9,
         "payment_redirect": 1.0,
         "recruiter_scam": 1.0,
-        "support_impersonation": 0.929
+        "support_impersonation": 1.0
       }
     },
     "leet": {
-      "recall": 0.674,
+      "recall": 0.717,
       "fpr": 0.0,
       "per_class_recall": {
         "credential_phish": 0.4,
-        "payment_redirect": 0.875,
+        "payment_redirect": 1.0,
         "recruiter_scam": 0.929,
-        "support_impersonation": 0.5
+        "support_impersonation": 0.571
       }
     },
     "spaced": {
@@ -175,13 +175,13 @@
       }
     },
     "synonym": {
-      "recall": 0.891,
+      "recall": 0.957,
       "fpr": 0.0,
       "per_class_recall": {
-        "credential_phish": 0.8,
-        "payment_redirect": 0.875,
+        "credential_phish": 0.9,
+        "payment_redirect": 1.0,
         "recruiter_scam": 1.0,
-        "support_impersonation": 0.857
+        "support_impersonation": 0.929
       }
     }
   },
@@ -190,18 +190,18 @@
       "recall": 0.978,
       "fpr": 0.0,
       "per_class_recall": {
-        "credential_phish": 1.0,
+        "credential_phish": 0.9,
         "payment_redirect": 1.0,
         "recruiter_scam": 1.0,
-        "support_impersonation": 0.929
+        "support_impersonation": 1.0
       }
     },
     "homoglyph": {
-      "recall": 0.609,
+      "recall": 0.63,
       "fpr": 0.0,
       "per_class_recall": {
         "credential_phish": 0.3,
-        "payment_redirect": 0.75,
+        "payment_redirect": 0.875,
         "recruiter_scam": 0.929,
         "support_impersonation": 0.429
       }
@@ -210,20 +210,20 @@
       "recall": 0.978,
       "fpr": 0.0,
       "per_class_recall": {
-        "credential_phish": 1.0,
+        "credential_phish": 0.9,
         "payment_redirect": 1.0,
         "recruiter_scam": 1.0,
-        "support_impersonation": 0.929
+        "support_impersonation": 1.0
       }
     },
     "leet": {
-      "recall": 0.674,
+      "recall": 0.717,
       "fpr": 0.0,
       "per_class_recall": {
         "credential_phish": 0.4,
-        "payment_redirect": 0.875,
+        "payment_redirect": 1.0,
         "recruiter_scam": 0.929,
-        "support_impersonation": 0.5
+        "support_impersonation": 0.571
       }
     },
     "spaced": {
@@ -237,13 +237,13 @@
       }
     },
     "synonym": {
-      "recall": 0.891,
+      "recall": 0.957,
       "fpr": 0.0,
       "per_class_recall": {
-        "credential_phish": 0.8,
-        "payment_redirect": 0.875,
+        "credential_phish": 0.9,
+        "payment_redirect": 1.0,
         "recruiter_scam": 1.0,
-        "support_impersonation": 0.857
+        "support_impersonation": 0.929
       }
     }
   }
