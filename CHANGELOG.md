@@ -2,31 +2,41 @@
 
 ## 0.3.0 — 2026-10-15
 
-Layer 2 → Layer 3 fusion and the closing of every measured gap.
+Layer 2 → Layer 3 fusion, and the closing of every gap the benchmark could show.
 
 - **Fusion.** The pipeline computes structured sender facts from Layers 1–2 (platform-owned,
   institutional, free-webmail, lookalike, or unrelated sender domain; display name claims
   the brand; link hosts platform-only / off-platform / same-as-sender / lookalike /
   embedded-domain) and hands them to both Layer 3 classifiers. The LLM prompt carries the
   platform policy; the rule classifier uses the facts directly. A deterministic discount
-  applies when a verified institution, an organisation on its own domain, or a webmail
-  peer asks for nothing sensitive (judged by the cue detector over de-obfuscated views,
-  never by the model's self-reported signals), links nowhere it does not control, and does
-  not claim the platform's authority in the body.
-- **Evidence floor.** Risk components below 0.15 no longer combine, so three weak
-  nothings cannot add up to a warning. `Thresholds.noise_floor`.
-- **Brand-agnostic embedded-domain detection** (`orbitallabs.io.docs-share.site`): a new
-  Layer 2 feature and a Layer 1 floor when a link embeds the sender's own domain.
-- **Cues.** 1→i leet view, rn→m / vv→w ASCII-confusable view, "log on", N-digit codes,
-  prepaid and branded cards, BEC pretexts, "verify it", conditional threats ("if you don't
-  verify") no longer read as negated requests. Host extraction strips zero-width characters.
+  then applies to an impersonation verdict when the sender is a verified institution, an
+  organisation on its own domain that Layer 2 finds unremarkable, or a webmail peer, *and*
+  nothing sensitive is asked for, *and* links go nowhere the sender does not control, *and*
+  the body does not claim the platform's authority. "Nothing sensitive" is vetoed by three
+  sources: the cue detector over de-obfuscated views, the model's label when it is an ask
+  type, and, for verified senders only, the model's own signals (a verified sender whose
+  message the model reads as asking for a code is held, never waved through).
+- **Evidence floor.** Risk components below `Thresholds.noise_floor` (0.20, above the 99th
+  percentile of Layer 2's score on 3,200 synthetic benign senders, 0.151) do not combine.
+- **New Layer 2 features.** Brand-agnostic embedded domain (`orbitallabs.io.docs-share.site`,
+  weight +5.65) and lure-worded throwaway domains (`hr-portal.co`, `auth-check.top`,
+  `secure-portal.app`, weight +5.12); both synth-trained. Layer 1 floor when a link embeds
+  the sender's own domain.
+- **Cues.** 1→i leet view; rn→m / vv→w ASCII-confusable view; "log on"; N-digit codes
+  with "respond with"; prepaid and branded cards; "$600 weekly"; "purchase the initial kit";
+  BEC pretexts; "verify it"; conditional threats ("if you don't verify") are not negated
+  requests; negation window widened to the clause. Host extraction strips zero-width
+  characters before matching.
 - **Benchmark.** Body-text variants leave URLs and bare domains untouched. The paraphrase
-  generator strips preambles, retries refusals with a second prompt, and drops the rest.
-  Persistent LLM cache; `--only-extra`; held-out Gemma-paraphrased corpus.
-- Results (full pipeline, recall / FPR): rule 1.00 / 0.00 on all ten variants and on the
-  Llama-paraphrased corpus; Llama 3.1 8B and Gemma 3 27B 1.00 / 0.00 on clean, zero-width,
-  injection, and the paraphrased corpus. See README for the held-out set and caveats.
-- 78 tests.
+  generator strips "Here is the rewritten message:" preambles, retries refusals with a second
+  prompt, drops the rest, and takes `--style` to produce distinct held-out corpora.
+  Persistent LLM cache; `--only-extra`; `--dump`.
+- **Results** (full pipeline, recall / FPR): rule 1.00 / 0.00 on all ten seed variants, the
+  Llama-paraphrased corpus, and the first Gemma-paraphrased corpus; Gemma 3 27B the same;
+  Llama 3.1 8B recall 1.00 everywhere with FPR 0.03–0.07, every false positive a genuine
+  notice the model insists asks for credentials. A second Gemma-paraphrased corpus in a
+  different register was evaluated once after all changes; see README.
+- 80 tests.
 
 ## 0.2.0 — 2026-10-13
 

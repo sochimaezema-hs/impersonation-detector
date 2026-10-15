@@ -121,7 +121,7 @@ class SenderSynth:
             "homoglyph_domain", "homoglyph_domain", "typo_domain", "tld_swap", "affix_domain",
             "prefix_domain", "subdomain_embed", "leet_domain", "freemail_brand_display",
             "brand_display_evil_domain", "punycode_domain", "homoglyph_display", "invisible_chars",
-            "brand_local_evil_domain", "foreign_embed", "foreign_embed",
+            "brand_local_evil_domain", "foreign_embed", "foreign_embed", "lure_domain", "lure_domain",
         ))
         domain_based = technique in {
             "homoglyph_domain", "typo_domain", "tld_swap", "affix_domain", "prefix_domain",
@@ -168,6 +168,16 @@ class SenderSynth:
         elif technique == "invisible_chars":
             zw = rng.choice((chr(0x200B), chr(0x200C), chr(0x2060)))
             s = Sender(f"{title[:3]}{zw}{title[3:]} {role}", f"{local}@{dom.replace('.', zw + '.')}")
+        elif technique == "lure_domain":
+            # infrastructure-sounding throwaway domain, no brand token at all
+            words = ("verify", "login", "auth", "secure", "account", "update", "portal", "support",
+                     "alerts", "notice", "check", "payroll", "docs", "share", "hr", "careers", "jobs", "talent")
+            n = rng.choice((1, 2))
+            name = "-".join(rng.sample(words, n)) if rng.random() < 0.6 else "".join(rng.sample(words, n))
+            d = f"{name}.{rng.choice(('co', 'app', 'top', 'xyz', 'net', 'online', 'site', 'io', 'com'))}"
+            who = rng.choice(ROLE_NAMES)
+            s = Sender(who if rng.random() < 0.6 else f"{rng.choice(PERSON_FIRST)} {rng.choice(PERSON_LAST)}",
+                       f"{local}@{d}")
         elif technique == "foreign_embed":
             # brand-agnostic: some organisation's domain embedded in the attacker's host
             co = rng.choice(OTHER_COMPANIES + tuple(self.brand_title.values()))

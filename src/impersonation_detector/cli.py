@@ -108,6 +108,10 @@ def main(argv: list[str] | None = None) -> int:
     _add_backend(pa)
     pa.add_argument("--out", required=True)
     pa.add_argument("-n", type=int, default=1, help="paraphrases per message")
+    pa.add_argument("--style", default=None,
+                    help="extra instruction appended to the rewrite prompt (e.g. a different register), "
+                         "to produce a distinct held-out corpus")
+    pa.add_argument("--suffix", default="p", help="id suffix letter (p0, q0, ...)")
 
     ex = sub.add_parser("export-seed", help="write the seed corpus for a protected set as JSONL")
     _add_protected(ex)
@@ -275,7 +279,8 @@ def main(argv: list[str] | None = None) -> int:
         from .bench.paraphrase import paraphrase_items, write_items
         if args.backend == "rule":
             parser.error("paraphrase needs an LLM backend (--backend ollama|openai|anthropic)")
-        items = paraphrase_items(load_seed(args.protected), make_backend(args.backend, args.model), n=args.n)
+        items = paraphrase_items(load_seed(args.protected), make_backend(args.backend, args.model), n=args.n,
+                                 style=args.style, suffix=args.suffix)
         write_items(items, Path(args.out))
         print(f"wrote {len(items)} paraphrases to {args.out}", file=sys.stderr)
         return 0

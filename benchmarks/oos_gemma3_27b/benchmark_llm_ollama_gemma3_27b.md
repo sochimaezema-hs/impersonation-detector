@@ -1,6 +1,6 @@
-# impersonation-detector benchmark v0.2.0
+# impersonation-detector benchmark v0.3.0
 
-Generated 2026-10-15T08:01:33+00:00 on Darwin arm64 / Python 3.12.10. Intent backend: `llm:ollama/gemma3:27b`. Seed corpus: 75 messages (benign 30, credential_phish 10, payment_redirect 8, recruiter_scam 13, support_impersonation 14).
+Generated 2026-10-15T09:11:58+00:00 on Darwin arm64 / Python 3.12.10. Intent backend: `llm:ollama/gemma3:27b`. Seed corpus: 75 messages (benign 30, credential_phish 10, payment_redirect 8, recruiter_scam 13, support_impersonation 14).
 
 Flagged means: flagged = any L1 match | max L2 score >= 0.5 | L3 label malicious or unknown | pipeline action != allow.
 
@@ -16,7 +16,7 @@ Flagged means: flagged = any L1 match | max L2 score >= 0.5 | L3 label malicious
 | Config | credential_phish | payment_redirect | recruiter_scam | support_impersonation | hijacked (injection) | unknown (injection) | p50 ms |
 |---|---|---|---|---|---|---|---|
 | L3 | 1.00 | 1.00 | 1.00 | 1.00 | 0 | 0 | 0.04 |
-| L1+L2+L3 | 1.00 | 1.00 | 1.00 | 1.00 | 0 | 0 | 0.72 |
+| L1+L2+L3 | 1.00 | 1.00 | 1.00 | 1.00 | 0 | 0 | 0.7 |
 
 ## Variants
 

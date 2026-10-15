@@ -5,8 +5,8 @@
     "Handshake Support"
   ],
   "intent_backend": "rule",
-  "version": "0.2.0",
-  "generated_at": "2026-10-15T08:01:03+00:00",
+  "version": "0.3.0",
+  "generated_at": "2026-10-15T09:09:34+00:00",
   "machine": "Darwin arm64 / Python 3.12.10",
   "n_seed": 76,
   "label_counts": {
@@ -32,7 +32,7 @@
           "recruiter_scam": 0.0,
           "support_impersonation": 0.0
         },
-        "latency_ms_p50": 0.28
+        "latency_ms_p50": 0.31
       },
       "homoglyph": {
         "n": 76,
@@ -48,7 +48,7 @@
           "recruiter_scam": 0.0,
           "support_impersonation": 0.0
         },
-        "latency_ms_p50": 0.29
+        "latency_ms_p50": 0.3
       },
       "zero_width": {
         "n": 76,
@@ -64,7 +64,7 @@
           "recruiter_scam": 0.0,
           "support_impersonation": 0.0
         },
-        "latency_ms_p50": 0.28
+        "latency_ms_p50": 0.31
       },
       "leet": {
         "n": 76,
@@ -96,7 +96,7 @@
           "recruiter_scam": 0.0,
           "support_impersonation": 0.0
         },
-        "latency_ms_p50": 0.29
+        "latency_ms_p50": 0.3
       },
       "synonym": {
         "n": 76,
@@ -160,7 +160,7 @@
           "recruiter_scam": 0.0,
           "support_impersonation": 0.0
         },
-        "latency_ms_p50": 0.33
+        "latency_ms_p50": 0.34
       },
       "sender_homoglyph": {
         "n": 46,
@@ -176,153 +176,153 @@
           "recruiter_scam": 1.0,
           "support_impersonation": 1.0
         },
-        "latency_ms_p50": 0.34
+        "latency_ms_p50": 0.31
       }
     },
     "L2": {
       "clean": {
         "n": 76,
         "precision": 1.0,
-        "recall": 0.304,
-        "f1": 0.467,
+        "recall": 0.587,
+        "f1": 0.74,
         "fpr": 0.0,
         "unknown": 0,
         "hijacked": 0,
         "per_class_recall": {
-          "credential_phish": 0.3,
-          "payment_redirect": 0.125,
-          "recruiter_scam": 0.0,
-          "support_impersonation": 0.714
+          "credential_phish": 0.9,
+          "payment_redirect": 0.375,
+          "recruiter_scam": 0.071,
+          "support_impersonation": 1.0
         },
         "latency_ms_p50": 0.14
       },
       "homoglyph": {
         "n": 76,
         "precision": 1.0,
-        "recall": 0.304,
-        "f1": 0.467,
+        "recall": 0.587,
+        "f1": 0.74,
         "fpr": 0.0,
         "unknown": 0,
         "hijacked": 0,
         "per_class_recall": {
-          "credential_phish": 0.3,
-          "payment_redirect": 0.125,
-          "recruiter_scam": 0.0,
-          "support_impersonation": 0.714
+          "credential_phish": 0.9,
+          "payment_redirect": 0.375,
+          "recruiter_scam": 0.071,
+          "support_impersonation": 1.0
         },
         "latency_ms_p50": 0.14
       },
       "zero_width": {
         "n": 76,
         "precision": 1.0,
-        "recall": 0.304,
-        "f1": 0.467,
+        "recall": 0.587,
+        "f1": 0.74,
         "fpr": 0.0,
         "unknown": 0,
         "hijacked": 0,
         "per_class_recall": {
-          "credential_phish": 0.3,
-          "payment_redirect": 0.125,
-          "recruiter_scam": 0.0,
-          "support_impersonation": 0.714
+          "credential_phish": 0.9,
+          "payment_redirect": 0.375,
+          "recruiter_scam": 0.071,
+          "support_impersonation": 1.0
         },
-        "latency_ms_p50": 0.15
+        "latency_ms_p50": 0.14
       },
       "leet": {
         "n": 76,
         "precision": 1.0,
-        "recall": 0.304,
-        "f1": 0.467,
+        "recall": 0.587,
+        "f1": 0.74,
         "fpr": 0.0,
         "unknown": 0,
         "hijacked": 0,
         "per_class_recall": {
-          "credential_phish": 0.3,
-          "payment_redirect": 0.125,
-          "recruiter_scam": 0.0,
-          "support_impersonation": 0.714
+          "credential_phish": 0.9,
+          "payment_redirect": 0.375,
+          "recruiter_scam": 0.071,
+          "support_impersonation": 1.0
         },
         "latency_ms_p50": 0.14
       },
       "spaced": {
         "n": 76,
         "precision": 1.0,
-        "recall": 0.304,
-        "f1": 0.467,
+        "recall": 0.587,
+        "f1": 0.74,
         "fpr": 0.0,
         "unknown": 0,
         "hijacked": 0,
         "per_class_recall": {
-          "credential_phish": 0.3,
-          "payment_redirect": 0.125,
-          "recruiter_scam": 0.0,
-          "support_impersonation": 0.714
+          "credential_phish": 0.9,
+          "payment_redirect": 0.375,
+          "recruiter_scam": 0.071,
+          "support_impersonation": 1.0
         },
-        "latency_ms_p50": 0.14
+        "latency_ms_p50": 0.15
       },
       "synonym": {
         "n": 76,
         "precision": 1.0,
-        "recall": 0.304,
-        "f1": 0.467,
+        "recall": 0.587,
+        "f1": 0.74,
         "fpr": 0.0,
         "unknown": 0,
         "hijacked": 0,
         "per_class_recall": {
-          "credential_phish": 0.3,
-          "payment_redirect": 0.125,
-          "recruiter_scam": 0.0,
-          "support_impersonation": 0.714
+          "credential_phish": 0.9,
+          "payment_redirect": 0.375,
+          "recruiter_scam": 0.071,
+          "support_impersonation": 1.0
         },
         "latency_ms_p50": 0.14
       },
       "injection": {
         "n": 46,
         "precision": 1.0,
-        "recall": 0.304,
-        "f1": 0.467,
+        "recall": 0.587,
+        "f1": 0.74,
         "fpr": 0.0,
         "unknown": 0,
         "hijacked": 0,
         "per_class_recall": {
-          "credential_phish": 0.3,
-          "payment_redirect": 0.125,
-          "recruiter_scam": 0.0,
-          "support_impersonation": 0.714
+          "credential_phish": 0.9,
+          "payment_redirect": 0.375,
+          "recruiter_scam": 0.071,
+          "support_impersonation": 1.0
         },
         "latency_ms_p50": 0.16
       },
       "link_homoglyph": {
         "n": 46,
         "precision": 1.0,
-        "recall": 0.304,
-        "f1": 0.467,
-        "fpr": 0.0,
-        "unknown": 0,
-        "hijacked": 0,
-        "per_class_recall": {
-          "credential_phish": 0.3,
-          "payment_redirect": 0.125,
-          "recruiter_scam": 0.0,
-          "support_impersonation": 0.714
-        },
-        "latency_ms_p50": 0.15
-      },
-      "link_subdomain": {
-        "n": 46,
-        "precision": 1.0,
-        "recall": 0.522,
-        "f1": 0.686,
+        "recall": 0.587,
+        "f1": 0.74,
         "fpr": 0.0,
         "unknown": 0,
         "hijacked": 0,
         "per_class_recall": {
           "credential_phish": 0.9,
-          "payment_redirect": 0.125,
-          "recruiter_scam": 0.0,
+          "payment_redirect": 0.375,
+          "recruiter_scam": 0.071,
           "support_impersonation": 1.0
         },
-        "latency_ms_p50": 0.14
+        "latency_ms_p50": 0.16
+      },
+      "link_subdomain": {
+        "n": 46,
+        "precision": 1.0,
+        "recall": 0.587,
+        "f1": 0.74,
+        "fpr": 0.0,
+        "unknown": 0,
+        "hijacked": 0,
+        "per_class_recall": {
+          "credential_phish": 0.9,
+          "payment_redirect": 0.375,
+          "recruiter_scam": 0.071,
+          "support_impersonation": 1.0
+        },
+        "latency_ms_p50": 0.15
       },
       "sender_homoglyph": {
         "n": 46,
@@ -338,91 +338,11 @@
           "recruiter_scam": 1.0,
           "support_impersonation": 1.0
         },
-        "latency_ms_p50": 0.14
+        "latency_ms_p50": 0.16
       }
     },
     "L3": {
       "clean": {
-        "n": 76,
-        "precision": 1.0,
-        "recall": 1.0,
-        "f1": 1.0,
-        "fpr": 0.0,
-        "unknown": 0,
-        "hijacked": 0,
-        "per_class_recall": {
-          "credential_phish": 1.0,
-          "payment_redirect": 1.0,
-          "recruiter_scam": 1.0,
-          "support_impersonation": 1.0
-        },
-        "latency_ms_p50": 0.41
-      },
-      "homoglyph": {
-        "n": 76,
-        "precision": 1.0,
-        "recall": 1.0,
-        "f1": 1.0,
-        "fpr": 0.0,
-        "unknown": 0,
-        "hijacked": 0,
-        "per_class_recall": {
-          "credential_phish": 1.0,
-          "payment_redirect": 1.0,
-          "recruiter_scam": 1.0,
-          "support_impersonation": 1.0
-        },
-        "latency_ms_p50": 0.42
-      },
-      "zero_width": {
-        "n": 76,
-        "precision": 1.0,
-        "recall": 1.0,
-        "f1": 1.0,
-        "fpr": 0.0,
-        "unknown": 0,
-        "hijacked": 0,
-        "per_class_recall": {
-          "credential_phish": 1.0,
-          "payment_redirect": 1.0,
-          "recruiter_scam": 1.0,
-          "support_impersonation": 1.0
-        },
-        "latency_ms_p50": 0.41
-      },
-      "leet": {
-        "n": 76,
-        "precision": 1.0,
-        "recall": 1.0,
-        "f1": 1.0,
-        "fpr": 0.0,
-        "unknown": 0,
-        "hijacked": 0,
-        "per_class_recall": {
-          "credential_phish": 1.0,
-          "payment_redirect": 1.0,
-          "recruiter_scam": 1.0,
-          "support_impersonation": 1.0
-        },
-        "latency_ms_p50": 0.51
-      },
-      "spaced": {
-        "n": 76,
-        "precision": 1.0,
-        "recall": 1.0,
-        "f1": 1.0,
-        "fpr": 0.0,
-        "unknown": 0,
-        "hijacked": 0,
-        "per_class_recall": {
-          "credential_phish": 1.0,
-          "payment_redirect": 1.0,
-          "recruiter_scam": 1.0,
-          "support_impersonation": 1.0
-        },
-        "latency_ms_p50": 0.56
-      },
-      "synonym": {
         "n": 76,
         "precision": 1.0,
         "recall": 0.978,
@@ -431,7 +351,87 @@
         "unknown": 0,
         "hijacked": 0,
         "per_class_recall": {
-          "credential_phish": 1.0,
+          "credential_phish": 0.9,
+          "payment_redirect": 1.0,
+          "recruiter_scam": 1.0,
+          "support_impersonation": 1.0
+        },
+        "latency_ms_p50": 0.43
+      },
+      "homoglyph": {
+        "n": 76,
+        "precision": 1.0,
+        "recall": 0.978,
+        "f1": 0.989,
+        "fpr": 0.0,
+        "unknown": 0,
+        "hijacked": 0,
+        "per_class_recall": {
+          "credential_phish": 0.9,
+          "payment_redirect": 1.0,
+          "recruiter_scam": 1.0,
+          "support_impersonation": 1.0
+        },
+        "latency_ms_p50": 0.44
+      },
+      "zero_width": {
+        "n": 76,
+        "precision": 1.0,
+        "recall": 0.978,
+        "f1": 0.989,
+        "fpr": 0.0,
+        "unknown": 0,
+        "hijacked": 0,
+        "per_class_recall": {
+          "credential_phish": 0.9,
+          "payment_redirect": 1.0,
+          "recruiter_scam": 1.0,
+          "support_impersonation": 1.0
+        },
+        "latency_ms_p50": 0.42
+      },
+      "leet": {
+        "n": 76,
+        "precision": 1.0,
+        "recall": 0.978,
+        "f1": 0.989,
+        "fpr": 0.0,
+        "unknown": 0,
+        "hijacked": 0,
+        "per_class_recall": {
+          "credential_phish": 0.9,
+          "payment_redirect": 1.0,
+          "recruiter_scam": 1.0,
+          "support_impersonation": 1.0
+        },
+        "latency_ms_p50": 0.55
+      },
+      "spaced": {
+        "n": 76,
+        "precision": 1.0,
+        "recall": 0.978,
+        "f1": 0.989,
+        "fpr": 0.0,
+        "unknown": 0,
+        "hijacked": 0,
+        "per_class_recall": {
+          "credential_phish": 0.9,
+          "payment_redirect": 1.0,
+          "recruiter_scam": 1.0,
+          "support_impersonation": 1.0
+        },
+        "latency_ms_p50": 0.55
+      },
+      "synonym": {
+        "n": 76,
+        "precision": 1.0,
+        "recall": 0.957,
+        "f1": 0.978,
+        "fpr": 0.0,
+        "unknown": 0,
+        "hijacked": 0,
+        "per_class_recall": {
+          "credential_phish": 0.9,
           "payment_redirect": 1.0,
           "recruiter_scam": 1.0,
           "support_impersonation": 0.929
@@ -441,61 +441,61 @@
       "injection": {
         "n": 46,
         "precision": 1.0,
-        "recall": 1.0,
-        "f1": 1.0,
+        "recall": 0.978,
+        "f1": 0.989,
         "fpr": 0.0,
         "unknown": 0,
         "hijacked": 0,
         "per_class_recall": {
-          "credential_phish": 1.0,
+          "credential_phish": 0.9,
           "payment_redirect": 1.0,
           "recruiter_scam": 1.0,
           "support_impersonation": 1.0
         },
-        "latency_ms_p50": 0.79
+        "latency_ms_p50": 0.81
       },
       "link_homoglyph": {
         "n": 46,
         "precision": 1.0,
-        "recall": 1.0,
-        "f1": 1.0,
+        "recall": 0.978,
+        "f1": 0.989,
         "fpr": 0.0,
         "unknown": 0,
         "hijacked": 0,
         "per_class_recall": {
-          "credential_phish": 1.0,
+          "credential_phish": 0.9,
           "payment_redirect": 1.0,
           "recruiter_scam": 1.0,
           "support_impersonation": 1.0
         },
-        "latency_ms_p50": 0.43
+        "latency_ms_p50": 0.42
       },
       "link_subdomain": {
         "n": 46,
         "precision": 1.0,
-        "recall": 1.0,
-        "f1": 1.0,
+        "recall": 0.978,
+        "f1": 0.989,
         "fpr": 0.0,
         "unknown": 0,
         "hijacked": 0,
         "per_class_recall": {
-          "credential_phish": 1.0,
+          "credential_phish": 0.9,
           "payment_redirect": 1.0,
           "recruiter_scam": 1.0,
           "support_impersonation": 1.0
         },
-        "latency_ms_p50": 0.4
+        "latency_ms_p50": 0.41
       },
       "sender_homoglyph": {
         "n": 46,
         "precision": 1.0,
-        "recall": 1.0,
-        "f1": 1.0,
+        "recall": 0.978,
+        "f1": 0.989,
         "fpr": 0.0,
         "unknown": 0,
         "hijacked": 0,
         "per_class_recall": {
-          "credential_phish": 1.0,
+          "credential_phish": 0.9,
           "payment_redirect": 1.0,
           "recruiter_scam": 1.0,
           "support_impersonation": 1.0
@@ -507,146 +507,146 @@
       "clean": {
         "n": 76,
         "precision": 1.0,
-        "recall": 0.304,
-        "f1": 0.467,
+        "recall": 0.587,
+        "f1": 0.74,
         "fpr": 0.0,
         "unknown": 0,
         "hijacked": 0,
         "per_class_recall": {
-          "credential_phish": 0.3,
-          "payment_redirect": 0.125,
-          "recruiter_scam": 0.0,
-          "support_impersonation": 0.714
+          "credential_phish": 0.9,
+          "payment_redirect": 0.375,
+          "recruiter_scam": 0.071,
+          "support_impersonation": 1.0
         },
-        "latency_ms_p50": 0.39
+        "latency_ms_p50": 0.38
       },
       "homoglyph": {
         "n": 76,
         "precision": 1.0,
-        "recall": 0.304,
-        "f1": 0.467,
+        "recall": 0.587,
+        "f1": 0.74,
         "fpr": 0.0,
         "unknown": 0,
         "hijacked": 0,
         "per_class_recall": {
-          "credential_phish": 0.3,
-          "payment_redirect": 0.125,
-          "recruiter_scam": 0.0,
-          "support_impersonation": 0.714
+          "credential_phish": 0.9,
+          "payment_redirect": 0.375,
+          "recruiter_scam": 0.071,
+          "support_impersonation": 1.0
         },
-        "latency_ms_p50": 0.39
+        "latency_ms_p50": 0.38
       },
       "zero_width": {
         "n": 76,
         "precision": 1.0,
-        "recall": 0.304,
-        "f1": 0.467,
+        "recall": 0.587,
+        "f1": 0.74,
         "fpr": 0.0,
         "unknown": 0,
         "hijacked": 0,
         "per_class_recall": {
-          "credential_phish": 0.3,
-          "payment_redirect": 0.125,
-          "recruiter_scam": 0.0,
-          "support_impersonation": 0.714
+          "credential_phish": 0.9,
+          "payment_redirect": 0.375,
+          "recruiter_scam": 0.071,
+          "support_impersonation": 1.0
         },
-        "latency_ms_p50": 0.42
+        "latency_ms_p50": 0.38
       },
       "leet": {
         "n": 76,
         "precision": 1.0,
-        "recall": 0.304,
-        "f1": 0.467,
+        "recall": 0.587,
+        "f1": 0.74,
         "fpr": 0.0,
         "unknown": 0,
         "hijacked": 0,
         "per_class_recall": {
-          "credential_phish": 0.3,
-          "payment_redirect": 0.125,
-          "recruiter_scam": 0.0,
-          "support_impersonation": 0.714
+          "credential_phish": 0.9,
+          "payment_redirect": 0.375,
+          "recruiter_scam": 0.071,
+          "support_impersonation": 1.0
         },
-        "latency_ms_p50": 0.42
+        "latency_ms_p50": 0.39
       },
       "spaced": {
         "n": 76,
         "precision": 1.0,
-        "recall": 0.304,
-        "f1": 0.467,
+        "recall": 0.587,
+        "f1": 0.74,
         "fpr": 0.0,
         "unknown": 0,
         "hijacked": 0,
         "per_class_recall": {
-          "credential_phish": 0.3,
-          "payment_redirect": 0.125,
-          "recruiter_scam": 0.0,
-          "support_impersonation": 0.714
+          "credential_phish": 0.9,
+          "payment_redirect": 0.375,
+          "recruiter_scam": 0.071,
+          "support_impersonation": 1.0
         },
-        "latency_ms_p50": 0.4
+        "latency_ms_p50": 0.38
       },
       "synonym": {
         "n": 76,
         "precision": 1.0,
-        "recall": 0.304,
-        "f1": 0.467,
+        "recall": 0.587,
+        "f1": 0.74,
         "fpr": 0.0,
         "unknown": 0,
         "hijacked": 0,
         "per_class_recall": {
-          "credential_phish": 0.3,
-          "payment_redirect": 0.125,
-          "recruiter_scam": 0.0,
-          "support_impersonation": 0.714
+          "credential_phish": 0.9,
+          "payment_redirect": 0.375,
+          "recruiter_scam": 0.071,
+          "support_impersonation": 1.0
         },
         "latency_ms_p50": 0.39
       },
       "injection": {
         "n": 46,
         "precision": 1.0,
-        "recall": 0.304,
-        "f1": 0.467,
+        "recall": 0.587,
+        "f1": 0.74,
         "fpr": 0.0,
         "unknown": 0,
         "hijacked": 0,
         "per_class_recall": {
-          "credential_phish": 0.3,
-          "payment_redirect": 0.125,
-          "recruiter_scam": 0.0,
-          "support_impersonation": 0.714
+          "credential_phish": 0.9,
+          "payment_redirect": 0.375,
+          "recruiter_scam": 0.071,
+          "support_impersonation": 1.0
         },
-        "latency_ms_p50": 0.42
+        "latency_ms_p50": 0.43
       },
       "link_homoglyph": {
         "n": 46,
         "precision": 1.0,
-        "recall": 0.5,
-        "f1": 0.667,
+        "recall": 0.587,
+        "f1": 0.74,
         "fpr": 0.0,
         "unknown": 0,
         "hijacked": 0,
         "per_class_recall": {
           "credential_phish": 0.9,
-          "payment_redirect": 0.125,
-          "recruiter_scam": 0.0,
-          "support_impersonation": 0.929
+          "payment_redirect": 0.375,
+          "recruiter_scam": 0.071,
+          "support_impersonation": 1.0
         },
-        "latency_ms_p50": 0.41
+        "latency_ms_p50": 0.45
       },
       "link_subdomain": {
         "n": 46,
         "precision": 1.0,
-        "recall": 0.522,
-        "f1": 0.686,
+        "recall": 0.587,
+        "f1": 0.74,
         "fpr": 0.0,
         "unknown": 0,
         "hijacked": 0,
         "per_class_recall": {
           "credential_phish": 0.9,
-          "payment_redirect": 0.125,
-          "recruiter_scam": 0.0,
+          "payment_redirect": 0.375,
+          "recruiter_scam": 0.071,
           "support_impersonation": 1.0
         },
-        "latency_ms_p50": 0.42
+        "latency_ms_p50": 0.43
       },
       "sender_homoglyph": {
         "n": 46,
@@ -662,7 +662,7 @@
           "recruiter_scam": 1.0,
           "support_impersonation": 1.0
         },
-        "latency_ms_p50": 0.43
+        "latency_ms_p50": 0.44
       }
     },
     "L1+L2+L3": {
@@ -696,7 +696,7 @@
           "recruiter_scam": 1.0,
           "support_impersonation": 1.0
         },
-        "latency_ms_p50": 1.01
+        "latency_ms_p50": 0.96
       },
       "zero_width": {
         "n": 76,
@@ -712,7 +712,7 @@
           "recruiter_scam": 1.0,
           "support_impersonation": 1.0
         },
-        "latency_ms_p50": 0.93
+        "latency_ms_p50": 0.96
       },
       "leet": {
         "n": 76,
@@ -728,7 +728,7 @@
           "recruiter_scam": 1.0,
           "support_impersonation": 1.0
         },
-        "latency_ms_p50": 1.2
+        "latency_ms_p50": 1.19
       },
       "spaced": {
         "n": 76,
@@ -744,7 +744,7 @@
           "recruiter_scam": 1.0,
           "support_impersonation": 1.0
         },
-        "latency_ms_p50": 1.23
+        "latency_ms_p50": 1.2
       },
       "synonym": {
         "n": 76,
@@ -760,7 +760,7 @@
           "recruiter_scam": 1.0,
           "support_impersonation": 1.0
         },
-        "latency_ms_p50": 0.94
+        "latency_ms_p50": 0.93
       },
       "injection": {
         "n": 46,
@@ -776,7 +776,7 @@
           "recruiter_scam": 1.0,
           "support_impersonation": 1.0
         },
-        "latency_ms_p50": 1.87
+        "latency_ms_p50": 2.0
       },
       "link_homoglyph": {
         "n": 46,
@@ -792,7 +792,7 @@
           "recruiter_scam": 1.0,
           "support_impersonation": 1.0
         },
-        "latency_ms_p50": 1.24
+        "latency_ms_p50": 1.26
       },
       "link_subdomain": {
         "n": 46,
@@ -808,7 +808,7 @@
           "recruiter_scam": 1.0,
           "support_impersonation": 1.0
         },
-        "latency_ms_p50": 1.24
+        "latency_ms_p50": 1.29
       },
       "sender_homoglyph": {
         "n": 46,
@@ -824,7 +824,7 @@
           "recruiter_scam": 1.0,
           "support_impersonation": 1.0
         },
-        "latency_ms_p50": 1.14
+        "latency_ms_p50": 1.17
       }
     }
   },

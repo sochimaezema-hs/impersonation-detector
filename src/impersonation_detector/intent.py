@@ -119,7 +119,7 @@ CUES: dict[str, re.Pattern[str]] = {
         r"\bconfirm your (identity|account|login|details|email)\b", r"\bverify your (identity|account|login|email|profile)\b",
         r"\bre-?verify\b", r"\bverify (it|now|your profile|today)\b", r"\bverification takes\b",
         r"\b(sign|log) ?(in|on) (here|now|via|using|with)\b", r"\blogon\b",
-        r"\b(enter|reply with|send|provide|type|confirm|share|input)\b[^.!?\n]{0,40}\b(\d[- ]?digit|six[- ]digit|four[- ]digit|eight[- ]digit|verification|one[- ]time|security|access|login|confirmation|2fa|mfa|otp)[- ]?codes?\b",
+        r"\b(enter|reply with|respond with|reply|respond|send|provide|type|confirm|share|input|text back|read (me|us|out))\b[^.!?\n]{0,40}\b(\d[- ]?digit|six[- ]digit|four[- ]digit|eight[- ]digit|verification|one[- ]time|security|access|login|confirmation|2fa|mfa|otp)[- ]?codes?\b",
         r"\b(enter|type|input) the code\b",
         r"\bupdate your (login|credentials|password|details|information|account)\b",
         r"\bsecure your account\b", r"\bconfirm your details\b", r"\b(your )?identity is unconfirmed\b"),
@@ -134,7 +134,7 @@ CUES: dict[str, re.Pattern[str]] = {
         r"\bfee (is |must be |will be )?(required|charged|paid)\b", r"\bdeposit (the|this|a) (check|cheque)\b",
         r"\bsend (back|us|me) (the )?(money|funds|payment|difference|balance|\$)", r"\bsend .{0,30}\bpayment to\b",
         r"\bpay (for )?(the )?(equipment|laptop|software|supplies|balance|fee)\b",
-        r"\b(purchase|buy) (the |a |three |\d+ )?(equipment|laptop|software|supplies|starter kit|kit|gift)",
+        r"\b(purchase|buy|order) (the |a |an |your |three |\d+ )?(\w+ )?(equipment|laptop|software|supplies|starter kit|kit|gift|cards?|materials)\b",
         r"\bpayment [^.!?\n]{0,25}\b(failed|rejected|pending|required|overdue)\b",
         r"\b(overpaid|overpayment)\b", r"\bkeep \$\s?\d", r"\bsend \$\s?\d", r"\bpay the \$"),
     "off_platform_move": _rx(r"\bwhats ?app\b", r"\btelegram\b", r"\bon signal\b", r"\bsignal (app|messenger)\b",
@@ -154,7 +154,7 @@ CUES: dict[str, re.Pattern[str]] = {
         r"\byou are hired\b", r"\bimmediate hire\b",
         r"\$\s?\d{2,3}(,\d{3})?\s*(/|per|an?|a)\s*(hour|hr|week|day|assignment)\b[^.!?\n]{0,80}\b(no (interview|experience)|simple|easy|flexible hours|work from home|from home|start (this|next) week|immediately)\b",
         r"\b(simple|easy|flexible|from home)\b[^.!?\n]{0,80}\$\s?\d{2,3}(,\d{3})?\s*(/|per|an?|a)\s*(hour|hr|week|day)\b",
-        r"\$\s?\d{3,4}\s*(/|per|a)\s*week\b"),
+        r"\$\s?\d{3,4}\s*(/|per|a|each)?\s*(week|weekly)\b"),
     "authority_claim": _rx(
         r"\b(support|security|trust ?(&|and) ?safety|compliance|admin(istration)?|it|help ?desk|verification|account( services)?|fraud|billing) (team|department|desk|center|office|services)\b",
         r"\bon behalf of (the )?(support|security|admin)", r"\bthis is (the )?(official|an official)\b",
@@ -184,7 +184,7 @@ CUES: dict[str, re.Pattern[str]] = {
 
 # A cue preceded by a negation within the same clause is advice, not a request:
 # "never send bank details by email" must not read as a payment request.
-_NEGATION = re.compile(r"\b(never|don'?t|do not|not|no|without|won'?t|will not|shouldn'?t|should not|there is no)\b[^.!?,;:\n]{0,30}$", re.IGNORECASE)
+_NEGATION = re.compile(r"\b(never|don'?t|do not|not|no|without|won'?t|will not|shouldn'?t|should not|there is no)\b[^.!?;:\n]{0,60}$", re.IGNORECASE)
 _NEGATABLE = frozenset({"payment_request", "credential_request", "personal_data_request", "off_platform_move"})
 
 RECRUITER_CUES = _rx(r"\b(job|position|role|opening|vacancy|opportunity|offer|internship|fellowship)\b", r"\bhir(e|ing|ed)\b",

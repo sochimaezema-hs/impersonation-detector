@@ -118,3 +118,26 @@ def test_fusion_discounts_webmail_peer_with_no_ask_and_no_link():
     scam = Message(body="Congratulations, you are hired at $45/hour, no interview needed. Add our manager on Telegram.",
                    sender_name="Acme HR", sender_address="acme.hr@gmail.com")
     assert d.analyze(scam).action in ("hold", "block")
+
+
+def test_trusted_sender_is_held_when_model_claims_an_ask():
+    # c04-style: real platform domain, no link, model says the message asks for a code
+    be = StaticBackend('{"label":"support_impersonation","confidence":0.95,"signals":["authority_claim","credential_request"]}')
+    d = Detector(PROTECTED, intent=LLMIntentClassifier(be))
+    m = Message(body="To complete the account verification process, please respond with the six-digit code "
+                     "that was recently delivered to your mobile phone.",
+                sender_name="Handshake Support", sender_address="support@handshake.com")
+    v = d.analyze(m)
+    assert v.action in ("hold", "block") and not any(r.startswith("fusion:") for r in v.reasons)
+
+
+def test_lure_domain_blocks_own_org_discount():
+    be = StaticBackend('{"label":"credential_phish","confidence":0.9,"signals":["credential_request"]}')
+    d = Detector(PROTECTED, intent=LLMIntentClassifier(be))
+    m = Message(body="To continue, please log in again at https://auth-check.top/sso so your applications are not lost.",
+                sender_name="Campus Portal", sender_address="portal@auth-check.top")
+    v = d.analyze(m)
+    assert v.action in ("hold", "block"), v.to_dict()
+    assert v.sender_score.features["domain_lure_words"] == 1.0
+    ok = Message(body="Following up on the role; happy to chat next week.", sender_name="Luis", sender_address="luis@acmerobotics.com")
+    assert d.analyze(ok).sender_score.features["domain_lure_words"] == 0.0

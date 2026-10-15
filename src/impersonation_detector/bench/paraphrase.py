@@ -53,7 +53,8 @@ def clean_paraphrase(text: str) -> str:
     return text
 
 
-def paraphrase_items(items: list[SeedItem], backend: Backend, n: int = 1, attempts: int = 3) -> list[SeedItem]:
+def paraphrase_items(items: list[SeedItem], backend: Backend, n: int = 1, attempts: int = 3,
+                     style: str | None = None, suffix: str = "p") -> list[SeedItem]:
     """One faithful rewrite per item (``n`` for more). A refusal, a preamble, or a JSON
     object is not a paraphrase: it is retried and then dropped, never kept as data."""
     out: list[SeedItem] = []
@@ -62,8 +63,10 @@ def paraphrase_items(items: list[SeedItem], backend: Backend, n: int = 1, attemp
             text = ""
             for attempt in range(attempts):
                 try:
-                    raw = backend.complete(SYSTEMS[attempt % len(SYSTEMS)], PROMPT.format(body=item.body),
-                                           json_mode=False).strip()
+                    prompt = PROMPT.format(body=item.body)
+                    if style:
+                        prompt = prompt.replace("Message:", f"Additional instruction: {style}\n\nMessage:", 1)
+                    raw = backend.complete(SYSTEMS[attempt % len(SYSTEMS)], prompt, json_mode=False).strip()
                 except BackendError as exc:
                     raise SystemExit(f"paraphrase failed on {item.id}: {exc}") from exc
                 text = clean_paraphrase(raw)
@@ -73,7 +76,7 @@ def paraphrase_items(items: list[SeedItem], backend: Backend, n: int = 1, attemp
             if not text:
                 print(f"dropped {item.id}: model refused or returned no paraphrase", file=sys.stderr)
                 continue
-            out.append(SeedItem(f"{item.id}-p{k}", item.label, item.sender_name, item.sender_address,
+            out.append(SeedItem(f"{item.id}-{suffix}{k}", item.label, item.sender_name, item.sender_address,
                                 item.subject, text, item.tags + ("paraphrase", backend.name)))
     return out
 

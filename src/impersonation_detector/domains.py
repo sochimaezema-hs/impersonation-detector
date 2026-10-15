@@ -47,6 +47,16 @@ ROLE_WORDS = frozenset({
     "hiring", "jobs", "employer", "employers",
 })
 
+# Words that make a registrable domain look like infrastructure rather than an organisation:
+# "secure-portal.app", "auth-check.top", "hr-portal.co", "account-update.net".
+DOMAIN_LURE_WORDS = frozenset({
+    "verify", "verification", "login", "logon", "signin", "auth", "secure", "security", "account",
+    "accounts", "update", "portal", "support", "helpdesk", "alert", "alerts", "notice", "check",
+    "confirm", "validate", "recovery", "reset", "payroll", "billing", "invoice", "docs", "share",
+    "mail", "webmail", "service", "services", "careers", "jobs", "hr", "talent", "connect", "hiring",
+    "official", "team", "admin",
+})
+
 # Generic tokens that never identify a brand on their own.
 _GENERIC = ROLE_WORDS | frozenset({
     "com", "net", "org", "edu", "io", "co", "www", "mail", "email", "the", "inc", "llc", "corp",

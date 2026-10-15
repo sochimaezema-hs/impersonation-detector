@@ -7,7 +7,7 @@ in messages — built as middleware for platforms whose users are contacted by
 strangers claiming an institutional role (job boards, campus networks, marketplaces).
 Zero runtime dependencies; an optional language model for Layer 3.
 
-**Status:** 0.2.0 — message detector (Layers 1–4) plus the lookalike-domain and account-takeover legs, all benchmarked and tested.
+**Status:** 0.3.0 — message detector (Layers 1–4 with Layer 2→3 fusion) plus the lookalike-domain and account-takeover legs, all benchmarked and tested.
 
 ## Why this exists
 
@@ -79,119 +79,128 @@ regardless of what the model says; output is schema-validated and a model that a
 "benign" to a message carrying an injection is overruled to `unknown`; unparseable output
 fails closed. The rule baseline cannot be hijacked at all, which is why both ship.
 
-## Benchmark results
+## Benchmark results (v0.3.0)
 
-Full table: [`benchmarks/benchmark_rule.md`](benchmarks/benchmark_rule.md). Recall on
-46 malicious messages / false-positive rate on 30 benign, by variant:
+Full pipeline (Layers 1+2+3 with fusion), recall on the 46 malicious messages / false-positive
+rate on the 30 benign, by Layer 3 backend. Source files are named in each row.
 
-| Config | clean | homoglyph | zero_width | leet | spaced | synonym | injection¹ | link_homoglyph¹ | link_subdomain¹ | sender_homoglyph¹ |
-|---|---|---|---|---|---|---|---|---|---|---|
-| L1 | 0.04 / 0.00 | 0.04 / 0.03 | 0.04 / 0.03 | 0.04 / 0.00 | 0.07 / 0.00 | 0.04 / 0.00 | 0.04 | 0.04 | 0.04 | **1.00** |
-| L2 | 0.28 / 0.00 | 0.33 / 0.03 | 0.28 / 0.03 | 0.28 / 0.00 | 0.28 / 0.00 | 0.28 / 0.00 | 0.28 | 0.50 | 0.52 | 1.00 |
-| L3 | 0.98 / 0.00 | 0.96 / 0.00 | 0.98 / 0.00 | 0.83 / 0.00 | 0.98 / 0.00 | 0.89 / 0.00 | 0.98 | 0.98 | 0.98 | 0.98 |
-| L1+L2+L3 | **1.00 / 0.00** | 0.98 / 0.03 | 1.00 / 0.03 | 0.94 / 0.00 | 1.00 / 0.00 | 0.94 / 0.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+**Development sets** (used while iterating on cues, fusion, and the benchmark itself):
 
-¹ malicious-only variants (recall). Injection hijack rate for the rule backend: 0 of 46.
-
-**Read these numbers honestly.** The seed corpus is also the development set for the
-rule baseline, so its clean-corpus numbers are in-sample. Layers 1 and 2 only know the
-protected brand, so their low recall on scams that never mention it is expected; their
-job is the sender, Layer 3's is the request.
-
-### Out-of-sample: Llama-paraphrased corpus
-
-`impersonation-detector paraphrase` had Llama 3.1 8B rewrite all 76 messages (same intent,
-different wording; `benchmarks/paraphrase_llama3.1_8b.jsonl`) and `bench --only-extra`
-scored the rewrites alone. The rule baseline had never seen this wording.
-
-| Backend | Config | recall | FPR | credential_phish | payment_redirect | recruiter_scam | support_impersonation |
-|---|---|---|---|---|---|---|---|
-| rule | L3 | 0.87 | 0.00 | 0.90 | 1.00 | 0.93 | 0.71 |
-| rule | L1+L2+L3 | **0.96** | **0.00** | 0.90 | 1.00 | 0.93 | 1.00 |
-| llama3.1:8b | L3 | 1.00 | 0.30 | 1.00 | 1.00 | 1.00 | 1.00 |
-| llama3.1:8b | L1+L2+L3 | 1.00 | 0.30 | 1.00 | 1.00 | 1.00 | 1.00 |
-
-The rules lose 13 points of Layer 3 recall to paraphrase, most of it on support
-impersonation, and the sender layers win 9 of those back: a rewritten support-impersonation
-message still comes from a free-mail address with the brand in its display name.
-
-### LLM backend: Llama 3.1 8B via Ollama (`benchmarks/benchmark_llm_ollama_llama3.1_8b.md`)
-
-| Config | clean | homoglyph | zero_width | leet | spaced | synonym | injection¹ | link variants¹ |
-|---|---|---|---|---|---|---|---|---|
-| L3 | 1.00 / 0.33 | 1.00 / 0.30 | 1.00 / 0.30 | 1.00 / 0.43 | 1.00 / 0.37 | 1.00 / 0.33 | 1.00 | 1.00 |
-| L1+L2+L3 | 1.00 / 0.33 | 1.00 / 0.33 | 1.00 / 0.33 | 1.00 / 0.43 | 1.00 / 0.37 | 1.00 / 0.33 | 1.00 | 1.00 |
-
-Three things the LLM run shows, all from `benchmarks/dump_llama3.1_8b.jsonl`:
-
-- **Recall is perfect and robustness is free.** No obfuscation variant and no paraphrase
-  moved the 8B model off 1.00 recall. The regex baseline needed explicit confusable folding
-  and de-spacing to get close.
-- **The false positives are the hard benign cases, and confidence does not separate them.**
-  Ten of 30 benign messages are flagged on the clean corpus: a genuine "your password was
-  changed" notice, a payroll onboarding note that says *never* send bank details by email,
-  a financial-aid verification request, a background-check email, an I-9/W-4 onboarding
-  message, a professor asking for a resume. The model's rationales invent cues ("requests
-  sensitive documents") that are not in the text. It assigns 0.8 to 0.9 confidence to these
-  and 0.9 to 1.0 to real attacks, so no threshold helps: at 0.95 the FPR reaches 0.00 but
-  recall collapses to 0.41. A small model that is right about intent is not calibrated
-  about it.
-- **The injection pre-filter earned its place.** Under the injection variant the model
-  complied with the injected instruction and answered "benign" on 5 of 46 attacks. All five
-  were overruled to `unknown` (held, not delivered) because the deterministic pre-filter had
-  already flagged the body. The hijack count in the table is 0 only because of that overrule.
-
-### A larger model: Gemma 3 27B (`benchmarks/benchmark_llm_ollama_gemma3_27b.md`)
-
-Same harness, 3.4× the parameters, run on the cells that matter (clean, injection,
-zero-width, and the paraphrased corpus):
-
-| Backend | clean | zero_width | injection¹ | paraphrased (OOS) | injection compliance |
+| Layer 3 backend | seed corpus, 10 variants | Llama-paraphrased (75) | Gemma-paraphrased #1 (76) | injection compliance | files |
 |---|---|---|---|---|---|
-| rule | 1.00 / 0.00 | 1.00 / 0.03 | 1.00 | 0.96 / 0.00 | 0 of 46 (cannot comply) |
-| llama3.1:8b | 1.00 / 0.33 | 1.00 / 0.30 | 1.00 | 1.00 / 0.30 | 5 of 46, all overruled |
-| gemma3:27b | **0.98 / 0.13** | 1.00 / 0.13 | 1.00 | **1.00 / 0.17** | **0 of 46** |
+| rule (no model) | **1.00 / 0.00** on every variant | **1.00 / 0.00** | **1.00 / 0.00** | cannot comply | `benchmark_rule.*`, `oos_rule/`, `heldout_rule/` |
+| Llama 3.1 8B | 1.00 / 0.03 (clean, zero-width, injection) | 1.00 / 0.03 | 1.00 / 0.07 | 6 of 46, all overruled | `benchmark_llm_ollama_llama3.1_8b.*`, `oos_llama3_1_8b/`, `heldout_llama3_1_8b/` |
+| Gemma 3 27B | **1.00 / 0.00** (clean, zero-width, injection) | **1.00 / 0.00** | **1.00 / 0.00** | 0 of 46 | `benchmark_llm_ollama_gemma3_27b.*`, `oos_gemma3_27b/`, `heldout_gemma3_27b/` |
 
-(full-pipeline rows; recall / FPR). Three observations from `benchmarks/dump_gemma3_27b.jsonl`:
+**Held-out set, evaluated once after every change was frozen** (`heldout2_gemma3_27b.jsonl`:
+Gemma rewrote all 76 messages in a different register, casual chat where the original was
+formal and vice versa, sentence order changed, every URL, address, amount and name kept):
 
-- **Scale buys precision, not just recall.** The false-positive rate drops from 0.33 to
-  0.13 on the clean corpus and from 0.30 to 0.17 on paraphrases, with recall essentially
-  unchanged. The 27B model's rationales cite cues that are actually in the text; the 8B
-  model's often did not.
-- **The residual false positives are all one kind.** Every benign message Gemma flags is a
-  genuine notice from an institution the recipient trusts: the platform's own support
-  reply, its Trust & Safety takedown notice, its password-changed alert, a financial-aid
-  office's document request. The model labels each `support_impersonation` because it has
-  no way to know the sender is who it claims to be. That knowledge lives in Layer 2
-  (`domain_is_protected`) and in the platform's own send pipeline. Fusing "the LLM says
-  support impersonation" with "the sender really is on the protected domain" is the next
-  step; it is not done here because the corpus also contains spoofed-From attacks (s06,
-  s11, c04) that a naive version of that rule would wave through.
-- **A larger model resisted every injection.** Gemma complied with the injected
-  instruction 0 times in 46, against 5 for Llama 8B. The pre-filter still runs: the
-  guarantee has to hold for whichever model is plugged in.
+| Layer 3 backend | recall | FPR | misses | false positives | files |
+|---|---|---|---|---|---|
+| rule (no model) | **1.00** | 0.03 | none | b08 | `heldout2_rule/` |
+| Llama 3.1 8B | **1.00** | 0.10 | none | b08, b17, b23 | `heldout2_llama3_1_8b/` |
+| Gemma 3 27B | **1.00** | **0.03** | none | b08 | `heldout2_gemma3_27b/` |
 
-One miss is worth naming: c07, a credential phish whose link host embeds a *third party's*
-domain (`orbitallabs.io.docs-share.site`) and whose sender is a plausible recruiter. No
-layer flags it; Layers 1 and 2 only know the protected brand, and both LLMs read the link
-as a meeting invite. Brand-agnostic lookalike detection of *any* embedded registrable
-domain is the obvious extension.
+No backend misses an attack on the frozen set. The one false positive all three share is a
+casual recruiter writing "You'll earn $30/hour working about 40 hours a week, and we provide
+the laptop": the too-good-to-be-true cue ("earn $") fires, which vetoes the fusion discount,
+and both models also read it as a scam. Llama additionally holds the password-changed notice
+(b17) and a financial-aid office's document request (b23) because it reports a credential ask
+on both; see "What the fusion does" for why a verified sender with a model-claimed ask is held
+rather than waved through. Unfused Layer 3 alone on this set: rule 0.83 / 0.03, Llama 1.00 /
+0.47, Gemma 1.00 / 0.07, which is the clearest statement of what the fusion is worth.
 
-Latency in the LLM tables is not meaningful: responses are served from the persistent
-cache on reruns. Uncached, Llama 8B took 2 to 6 s per message and Gemma 27B about 8 s on an
-M4 Max. The `--backend anthropic` and `--backend openai` paths run unchanged for hosted models.
+**How to read this.** The development-set zeros are the product of iterating: every miss and
+false positive the benchmark surfaced was traced to a cause and fixed in the detector, the
+fusion rules, or (twice) the benchmark itself. The first Gemma-paraphrased corpus was meant to
+be held out and instead exposed a design flaw in the fusion gate (below), so it became a
+development set too and a second corpus was generated in a different register. The frozen
+table is the number to quote. The LLM backends themselves were never tuned. The seed corpus
+is small (76 messages) and English-only by design; a platform deploying this should expect
+to re-run the benchmark on its own labelled traffic.
 
-What the benchmark already shows:
+### What each layer alone sees
+
+The unfused rows (`benchmark_rule.md`) show why the layers exist. Layer 1 alone catches 4% of
+attacks (it only knows confusables of the brand) but 100% of sender-domain homographs; Layer 2
+alone 30% (it only knows the brand) but 100% of embedded and lookalike link hosts; the rule
+Layer 3 alone 100% on the clean corpus and 98% on the hardest variants, falling to 91% on
+paraphrases; the fused pipeline closes each of those gaps with the other layers' evidence.
+The LLM Layer 3 alone is the opposite shape: recall 1.00 everywhere with a false-positive
+rate of 0.40 (Llama 8B) or 0.03 (Gemma 27B), which fusion brings to 0.00.
+
+### What the fusion does
+
+Layers 1 and 2 hand Layer 3 structured sender facts: whether the sender's domain is the
+platform's own, a university's, free webmail, a lookalike, or an unrelated organisation;
+whether the display name claims the brand; whether link hosts stay on the platform, go to the
+sender's own domain, imitate the platform, or hide another organisation's domain inside their
+own. The LLM reads them with an explicit platform policy (the platform's real support never
+asks for codes, passwords, or payment). The rule classifier reads them directly.
+
+Then a deterministic discount applies to an impersonation verdict when four things hold. The
+sender is a verified institution, an organisation on its own domain that Layer 2 finds
+unremarkable (score below 0.3, which excludes lure-worded throwaway domains such as
+`hr-portal.co` or `auth-check.top`), or a webmail peer. Nothing sensitive is asked for, as
+judged by three vetoes: the cue detector over de-obfuscated text, the model's label when it is
+an ask type (credential phish, payment redirect), and, for verified senders only, the model's
+own signal list. Links go nowhere the sender does not control. And the body does not claim the
+platform's authority from a non-platform address. Risk components below 0.20 (above the 99th
+percentile of Layer 2's score on 3,200 synthetic benign senders) do not combine, so an
+ordinary organisation domain plus a role word plus a discounted intent cannot sum to a warning.
+
+Two design choices came out of the held-out run rather than the development sets. The first
+version of the gate let the deterministic cues alone decide whether a sensitive ask was present,
+and a cue list cannot keep up with a paraphrasing model: six messages that both LLMs had
+labelled correctly ("respond with the six-digit code", "purchase the initial kit") were
+discounted because the regexes did not recognise the wording. The model's own ask-type label
+now vetoes the discount. The second is the lure-domain feature: an attacker's "own domain" is
+usually `secure-portal.app`, not `acmerobotics.com`, and Layer 2 can tell them apart.
+
+What the fusion costs: Llama 8B still insists that a genuine "your password was changed"
+notice from the platform is a credential phish, and because a verified sender whose message the
+model reads as asking for credentials is held for review rather than waved through, that notice
+is held. That is the designed outcome for a weak model and the only false positive it keeps.
+Gemma 27B, given the same facts, labels every genuine platform notice benign on its own. The
+spoofed-From attacks in the corpus (the real platform domain in the From, a lookalike link or a
+request for a one-time code in the body) stay caught because each has a sensitive ask or a
+foreign link.
+
+### Findings the benchmark produced
 
 - **UTS #39 has gaps.** Cyrillic `т` and Greek `κ` map to non-ASCII Latin prototypes
   (U+1D1B, U+0138), not to `t` and `k`, so a skeleton-only detector does not match
   `hаndsһaκe` to `handshake` by skeleton equality; the mixed-script feature in Layer 2
-  and the edit-distance check close it.
-- **Regex cues die on cheap obfuscation.** Before confusable folding and de-spacing the rule
-  baseline lost 37 points of recall to one swapped glyph; after, 2.
-- **Negation matters.** "Never send bank details by email" from a real employer must not be
-  a payment request.
+  and the edit-distance check close it. ASCII confusables run the other way: `rn` for `m`
+  (`Venrno`) is folded by UTS #39 *toward* `rn`, so the detector needs an explicit view.
+- **Regex cues die on cheap obfuscation** until the text is normalized: confusable folding,
+  two leet readings (`1` as `l` and as `i`), de-spacing. Before those views the rule
+  baseline lost 37 points of recall to one swapped glyph.
+- **Negation has a conditional exception.** "Never send bank details by email" is advice;
+  "your privileges will be revoked if you don't verify your account" is a threat. The first
+  version of the negation guard treated both as negated requests and discounted a support
+  impersonation that all three backends had correctly labelled.
+- **Small models invent evidence.** Llama 8B's rationales cite cues absent from the text and
+  its confidence does not separate its errors (0.8–0.9 on false positives, 0.9–1.0 on real
+  attacks). Gemma 27B's cues are real and its confidence is usable. Neither should be the
+  sole judge of whether a sender is who it claims to be: that is Layer 2's knowledge.
+- **The pre-filter earns its place.** Under the injection variant the 8B model complied with
+  the injected instruction on 6 of 46 attacks; every one was overruled because the
+  deterministic pre-filter had already flagged the body. The 27B model complied 0 times.
+  The guarantee has to hold for whichever model is plugged in.
+- **Brand-agnostic deception exists.** A credential phish whose link host embeds a *third
+  party's* domain (`orbitallabs.io.docs-share.site`) from a plausible recruiter was missed by
+  every layer in v0.2.0; a public TLD as an interior host label is now a Layer 2 feature and
+  a Layer 1 floor.
+- **Benchmarks have bugs too.** Two false positives in earlier tables were the benchmark
+  mutating the platform's own link inside a benign message; a paraphrase set shrank to 25
+  rows because the refusal filter mistook "Here is the rewritten message:" for a refusal.
+  Both are fixed and documented in the changelog.
 
+Latency in the LLM tables is not meaningful: responses are served from the persistent cache
+on reruns. Uncached, Llama 8B took 2 to 6 s per message and Gemma 27B about 8 s on an M4
+Max. The `--backend anthropic` and `--backend openai` paths run unchanged for hosted models.
 
 ## The other two legs
 
@@ -265,7 +274,7 @@ mechanism, not as a field result.
 ```bash
 git clone https://github.com/sochimaezema-hs/impersonation-detector && cd impersonation-detector
 python -m venv .venv && . .venv/bin/activate && pip install -e ".[dev]"
-pytest -q                                                   # 61 tests
+pytest -q                                                   # 78 tests
 python -m impersonation_detector.train                      # retrain Layer 2 (3 s, pure Python)
 impersonation-detector bench -p handshake.com -p Handshake -p "Handshake Support" --out benchmarks/
 impersonation-detector bench ... --backend ollama --model llama3.1:8b --cache benchmarks/cache.jsonl --dump benchmarks/dump.jsonl

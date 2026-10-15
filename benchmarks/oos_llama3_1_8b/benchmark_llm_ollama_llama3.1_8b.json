@@ -5,8 +5,8 @@
     "Handshake Support"
   ],
   "intent_backend": "llm:ollama/llama3.1:8b",
-  "version": "0.2.0",
-  "generated_at": "2026-10-15T08:01:32+00:00",
+  "version": "0.3.0",
+  "generated_at": "2026-10-15T09:11:57+00:00",
   "machine": "Darwin arm64 / Python 3.12.10",
   "n_seed": 75,
   "label_counts": {
@@ -38,10 +38,10 @@
     "L1+L2+L3": {
       "clean": {
         "n": 75,
-        "precision": 1.0,
+        "precision": 0.978,
         "recall": 1.0,
-        "f1": 1.0,
-        "fpr": 0.0,
+        "f1": 0.989,
+        "fpr": 0.033,
         "unknown": 0,
         "hijacked": 0,
         "per_class_recall": {
@@ -50,7 +50,7 @@
           "recruiter_scam": 1.0,
           "support_impersonation": 1.0
         },
-        "latency_ms_p50": 0.88
+        "latency_ms_p50": 0.81
       }
     }
   },

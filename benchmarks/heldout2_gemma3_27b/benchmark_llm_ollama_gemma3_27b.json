@@ -1,0 +1,58 @@
+{
+  "protected": [
+    "handshake.com",
+    "Handshake",
+    "Handshake Support"
+  ],
+  "intent_backend": "llm:ollama/gemma3:27b",
+  "version": "0.3.0",
+  "generated_at": "2026-10-15T10:09:48+00:00",
+  "machine": "Darwin arm64 / Python 3.12.10",
+  "n_seed": 76,
+  "label_counts": {
+    "benign": 30,
+    "credential_phish": 10,
+    "payment_redirect": 8,
+    "recruiter_scam": 14,
+    "support_impersonation": 14
+  },
+  "results": {
+    "L3": {
+      "clean": {
+        "n": 76,
+        "precision": 0.958,
+        "recall": 1.0,
+        "f1": 0.979,
+        "fpr": 0.067,
+        "unknown": 0,
+        "hijacked": 0,
+        "per_class_recall": {
+          "credential_phish": 1.0,
+          "payment_redirect": 1.0,
+          "recruiter_scam": 1.0,
+          "support_impersonation": 1.0
+        },
+        "latency_ms_p50": 0.05
+      }
+    },
+    "L1+L2+L3": {
+      "clean": {
+        "n": 76,
+        "precision": 0.979,
+        "recall": 1.0,
+        "f1": 0.989,
+        "fpr": 0.033,
+        "unknown": 0,
+        "hijacked": 0,
+        "per_class_recall": {
+          "credential_phish": 1.0,
+          "payment_redirect": 1.0,
+          "recruiter_scam": 1.0,
+          "support_impersonation": 1.0
+        },
+        "latency_ms_p50": 1.12
+      }
+    }
+  },
+  "threshold_note": "flagged = any L1 match | max L2 score >= 0.5 | L3 label malicious or unknown | pipeline action != allow"
+}

@@ -5,8 +5,8 @@
     "Handshake Support"
   ],
   "intent_backend": "llm:ollama/gemma3:27b",
-  "version": "0.2.0",
-  "generated_at": "2026-10-15T08:01:33+00:00",
+  "version": "0.3.0",
+  "generated_at": "2026-10-15T09:11:58+00:00",
   "machine": "Darwin arm64 / Python 3.12.10",
   "n_seed": 75,
   "label_counts": {
@@ -50,7 +50,7 @@
           "recruiter_scam": 1.0,
           "support_impersonation": 1.0
         },
-        "latency_ms_p50": 0.72
+        "latency_ms_p50": 0.7
       }
     }
   },

@@ -7,10 +7,12 @@ verbatim in the trained weights file and in ``SenderScore.contributions``.
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 
 from .distance import osa_distance
 from .domains import (
+    DOMAIN_LURE_WORDS,
     FREE_MAIL,
     ROLE_WORDS,
     brand_tokens,
@@ -38,6 +40,7 @@ FEATURE_NAMES: tuple[str, ...] = (
     "domain_brand_affix",
     "domain_brand_in_subdomain",
     "domain_embeds_foreign_domain",
+    "domain_lure_words",
     "domain_leet_match",
     "domain_free_mail",
     "domain_missing",
@@ -134,6 +137,10 @@ class FeatureExtractor:
         f["domain_mixed_script"] = float(is_mixed_script(reg))
         f["domain_free_mail"] = float(reg in FREE_MAIL)
         f["domain_embeds_foreign_domain"] = float(embedded_domain(domain) is not None)
+        sld_tokens = [t for t in re.split(r"[^a-z0-9]+", sld(domain)) if t]
+        f["domain_lure_words"] = float(
+            bool(sld_tokens) and all(t in DOMAIN_LURE_WORDS or t.isdigit() for t in sld_tokens)
+            and reg not in FREE_MAIL)
         if reg in self.domains:
             f["domain_is_protected"] = 1.0
             return f

@@ -51,9 +51,10 @@ class Thresholds:
     warn: float = 0.30
     hold: float = 0.60
     block: float = 0.85
-    # Evidence below this level is noise (a role word, an ordinary organisation domain) and
-    # does not combine: three weak nothings must not add up to a warning.
-    noise_floor: float = 0.15
+    # Evidence below this level is noise and does not combine: three weak nothings must not
+    # add up to a warning. Set above the 99th percentile of Layer 2's score on synthetic
+    # benign senders (0.151 over 3,200 samples; see README "What the fusion does").
+    noise_floor: float = 0.20
 
 
 @dataclass
@@ -276,34 +277,44 @@ class Detector:
             intent_risk = intent.risk
             if fused and intent.is_malicious:
                 fset = set(facts)
-                # Who is the sender? Verified institutions, or an organisation on its own domain.
+                # Who is the sender? A verified institution; an organisation on its own domain
+                # that Layer 2 finds unremarkable; or a webmail peer with no brand claim.
+                sender_p = sender_score.probability if sender_score else 0.0
                 trusted = bool({"sender:platform-domain", "sender:institutional-domain"} & fset)
-                own_org = "sender:unrelated-domain" in fset and not display_claims_brand
-                # A peer on free webmail who asks for nothing and links nowhere is a peer.
+                own_org = ("sender:unrelated-domain" in fset and not display_claims_brand
+                           and sender_p < 0.3)
                 peer = ("sender:free-webmail" in fset and not display_claims_brand
-                        and "links:none" in fset)
+                        and "links:none" in fset and sender_p < 0.3)
                 # Do the links go anywhere the sender does not control?
                 links_safe = not ({"links:lookalike", "links:embedded-domain"} & fset) and (
                     "links:off-platform" not in fset or "links:same-as-sender" in fset)
-                # Is anything sensitive actually asked for? Judged by the deterministic cue
-                # detector on the text, not by the model's self-reported signals, which a
-                # small model invents ("requests sensitive documents" for a resume).
+                # Is anything sensitive asked for? Three sources, any one of which vetoes:
+                # the deterministic cue detector over de-obfuscated views; the model's label
+                # when it is an ask-type label; and, for verified senders only, the model's
+                # own signals (a verified sender whose message the model reads as asking for
+                # a code or payment is held for review, never waved through).
                 asked: set[str] = set()
                 for view in text_views(_normalize(f"{msg.subject}\n{msg.body}")):
                     asked |= detect_signals(view)
-                sensitive = bool({"credential_request", "payment_request", "personal_data_request",
-                                  "off_platform_move", "too_good_to_be_true"} & asked) \
-                    or "injection_attempt" in intent.signals
-                # The body claims the platform's authority ("Warning from <brand> Trust and
-                # Safety") but the sender is not the platform: never discount that.
+                ask_signals = {"credential_request", "payment_request", "personal_data_request",
+                               "off_platform_move", "too_good_to_be_true"}
+                det_ask = bool(ask_signals & asked) or "injection_attempt" in intent.signals
+                label_is_ask = intent.label in ("credential_phish", "payment_redirect")
+                model_ask = bool(ask_signals & set(intent.signals))
+                # The body claims the platform's authority but the sender is not the platform.
                 body_tokens = set(tokenize(msg.body))
-                claims_platform_in_body = (not trusted and "authority_claim" in asked
-                                           and bool(self.scorer.extractor.brands & body_tokens))
-                if (trusted or own_org or peer) and links_safe and not sensitive and not claims_platform_in_body:
-                    # The classifier called it an attack, but the sender is who it says it is
-                    # (or at least an organisation on its own domain), asks for nothing
-                    # sensitive, and links nowhere it does not control. That is a notice or an
-                    # ordinary recruiter, whatever its tone.
+                brand_in_body = bool(self.scorer.extractor.brands & body_tokens)
+                claims_platform_in_body = not trusted and brand_in_body and (
+                    "authority_claim" in asked or intent.label == "support_impersonation")
+                if trusted:
+                    ok = (not det_ask and not model_ask and not label_is_ask and links_safe)
+                elif own_org:
+                    ok = (not det_ask and links_safe and not claims_platform_in_body)
+                elif peer:
+                    ok = (not det_ask and not label_is_ask and not claims_platform_in_body)
+                else:
+                    ok = False
+                if ok:
                     intent_risk *= 0.25
                     who = ("trusted sender" if trusted else
                            "organisation on its own domain" if own_org else "peer on webmail")

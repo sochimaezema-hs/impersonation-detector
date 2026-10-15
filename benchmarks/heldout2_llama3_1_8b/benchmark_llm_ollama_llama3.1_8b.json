@@ -4,9 +4,9 @@
     "Handshake",
     "Handshake Support"
   ],
-  "intent_backend": "llm:ollama/gemma3:27b",
-  "version": "0.2.0",
-  "generated_at": "2026-10-15T02:48:23+00:00",
+  "intent_backend": "llm:ollama/llama3.1:8b",
+  "version": "0.3.0",
+  "generated_at": "2026-10-15T09:26:07+00:00",
   "machine": "Darwin arm64 / Python 3.12.10",
   "n_seed": 76,
   "label_counts": {
@@ -20,28 +20,10 @@
     "L3": {
       "clean": {
         "n": 76,
-        "precision": 0.902,
+        "precision": 0.767,
         "recall": 1.0,
-        "f1": 0.948,
-        "fpr": 0.167,
-        "unknown": 1,
-        "hijacked": 0,
-        "per_class_recall": {
-          "credential_phish": 1.0,
-          "payment_redirect": 1.0,
-          "recruiter_scam": 1.0,
-          "support_impersonation": 1.0
-        },
-        "latency_ms_p50": 0.03
-      }
-    },
-    "L1+L2+L3": {
-      "clean": {
-        "n": 76,
-        "precision": 0.902,
-        "recall": 1.0,
-        "f1": 0.948,
-        "fpr": 0.167,
+        "f1": 0.868,
+        "fpr": 0.467,
         "unknown": 0,
         "hijacked": 0,
         "per_class_recall": {
@@ -50,7 +32,25 @@
           "recruiter_scam": 1.0,
           "support_impersonation": 1.0
         },
-        "latency_ms_p50": 0.4
+        "latency_ms_p50": 0.07
+      }
+    },
+    "L1+L2+L3": {
+      "clean": {
+        "n": 76,
+        "precision": 0.939,
+        "recall": 1.0,
+        "f1": 0.968,
+        "fpr": 0.1,
+        "unknown": 0,
+        "hijacked": 0,
+        "per_class_recall": {
+          "credential_phish": 1.0,
+          "payment_redirect": 1.0,
+          "recruiter_scam": 1.0,
+          "support_impersonation": 1.0
+        },
+        "latency_ms_p50": 1.23
       }
     }
   },

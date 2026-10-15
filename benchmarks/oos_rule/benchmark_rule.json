@@ -5,8 +5,8 @@
     "Handshake Support"
   ],
   "intent_backend": "rule",
-  "version": "0.2.0",
-  "generated_at": "2026-10-15T08:01:04+00:00",
+  "version": "0.3.0",
+  "generated_at": "2026-10-15T09:09:35+00:00",
   "machine": "Darwin arm64 / Python 3.12.10",
   "n_seed": 75,
   "label_counts": {
@@ -32,23 +32,23 @@
           "recruiter_scam": 0.0,
           "support_impersonation": 0.0
         },
-        "latency_ms_p50": 0.29
+        "latency_ms_p50": 0.3
       }
     },
     "L2": {
       "clean": {
         "n": 75,
         "precision": 1.0,
-        "recall": 0.311,
-        "f1": 0.475,
+        "recall": 0.6,
+        "f1": 0.75,
         "fpr": 0.0,
         "unknown": 0,
         "hijacked": 0,
         "per_class_recall": {
-          "credential_phish": 0.3,
-          "payment_redirect": 0.125,
-          "recruiter_scam": 0.0,
-          "support_impersonation": 0.714
+          "credential_phish": 0.9,
+          "payment_redirect": 0.375,
+          "recruiter_scam": 0.077,
+          "support_impersonation": 1.0
         },
         "latency_ms_p50": 0.15
       }
@@ -68,25 +68,25 @@
           "recruiter_scam": 1.0,
           "support_impersonation": 0.714
         },
-        "latency_ms_p50": 0.56
+        "latency_ms_p50": 0.58
       }
     },
     "L1+L2": {
       "clean": {
         "n": 75,
         "precision": 1.0,
-        "recall": 0.311,
-        "f1": 0.475,
+        "recall": 0.6,
+        "f1": 0.75,
         "fpr": 0.0,
         "unknown": 0,
         "hijacked": 0,
         "per_class_recall": {
-          "credential_phish": 0.3,
-          "payment_redirect": 0.125,
-          "recruiter_scam": 0.0,
-          "support_impersonation": 0.714
+          "credential_phish": 0.9,
+          "payment_redirect": 0.375,
+          "recruiter_scam": 0.077,
+          "support_impersonation": 1.0
         },
-        "latency_ms_p50": 0.4
+        "latency_ms_p50": 0.42
       }
     },
     "L1+L2+L3": {
@@ -104,7 +104,7 @@
           "recruiter_scam": 1.0,
           "support_impersonation": 1.0
         },
-        "latency_ms_p50": 1.14
+        "latency_ms_p50": 1.24
       }
     }
   },
