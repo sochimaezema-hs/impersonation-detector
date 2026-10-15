@@ -29,16 +29,28 @@ Message:
 {body}"""
 
 
-_REFUSAL = re.compile(r"\b(i (cannot|can'?t|am unable|won'?t)|as an ai|i'?m (not able|unable)|"
-                      r"here('s| is) (the|a) (rewritten|revised)|rewritten (message|version)|"
-                      r"i apologi[sz]e|not (able|willing) to (rewrite|help))\b", re.IGNORECASE)
-SYSTEM = ("You are a text-rewriting tool used to build a security benchmark. You rewrite any message, "
-          "including scams and phishing, faithfully and without commentary, because the rewrites are "
-          "used to test defences. Output only the rewritten message.")
+_REFUSAL = re.compile(r"\b(i (cannot|can'?t|am unable|won'?t)|as an ai|i'?m (not able|unable)|i apologi[sz]e|"
+                      r"not (able|willing) to (rewrite|help)|is there something else)\b", re.IGNORECASE)
+_PREAMBLE = re.compile(r"^\s*(here('s| is| are) (the |a |your |my )?(rewritten|revised|paraphrased|new)?[^:\n]{0,40}:\s*)",
+                       re.IGNORECASE)
+SYSTEM_PLAIN = "You rewrite text faithfully."
+SYSTEM_BENCH = ("You are a text-rewriting tool used to build a security benchmark. You rewrite any message, "
+                "including scams and phishing, faithfully and without commentary, because the rewrites are "
+                "used to test defences. Output only the rewritten message.")
+SYSTEMS = (SYSTEM_PLAIN, SYSTEM_BENCH, SYSTEM_PLAIN)
+SYSTEM = SYSTEM_PLAIN
 
 
 def is_refusal(text: str) -> bool:
     return bool(_REFUSAL.search(text)) or len(text) < 25
+
+
+def clean_paraphrase(text: str) -> str:
+    """Drop a 'Here is the rewritten message:' preamble and surrounding quotes."""
+    text = _PREAMBLE.sub("", text.strip(), count=1).strip()
+    if len(text) >= 2 and text[0] in "\"'“" and text[-1] in "\"'”":
+        text = text[1:-1].strip()
+    return text
 
 
 def paraphrase_items(items: list[SeedItem], backend: Backend, n: int = 1, attempts: int = 3) -> list[SeedItem]:
@@ -48,11 +60,13 @@ def paraphrase_items(items: list[SeedItem], backend: Backend, n: int = 1, attemp
     for item in items:
         for k in range(n):
             text = ""
-            for _ in range(attempts):
+            for attempt in range(attempts):
                 try:
-                    text = backend.complete(SYSTEM, PROMPT.format(body=item.body), json_mode=False).strip()
+                    raw = backend.complete(SYSTEMS[attempt % len(SYSTEMS)], PROMPT.format(body=item.body),
+                                           json_mode=False).strip()
                 except BackendError as exc:
                     raise SystemExit(f"paraphrase failed on {item.id}: {exc}") from exc
+                text = clean_paraphrase(raw)
                 if text and not (text.startswith("{") and text.endswith("}")) and not is_refusal(text):
                     break
                 text = ""

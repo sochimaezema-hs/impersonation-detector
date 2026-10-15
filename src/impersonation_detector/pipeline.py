@@ -22,9 +22,18 @@ from .domains import (
     registrable,
     sld,
     strip_invisible,
+    tokenize,
 )
 from .features import Sender
-from .intent import IntentResult, LLMIntentClassifier, Message, RuleIntentClassifier
+from .intent import (
+    IntentResult,
+    LLMIntentClassifier,
+    Message,
+    RuleIntentClassifier,
+    _normalize,
+    detect_signals,
+    text_views,
+)
 from .lookalike import LookalikeDetector, Match
 from .scorer import SenderScore, SenderScorer
 
@@ -42,6 +51,9 @@ class Thresholds:
     warn: float = 0.30
     hold: float = 0.60
     block: float = 0.85
+    # Evidence below this level is noise (a role word, an ordinary organisation domain) and
+    # does not combine: three weak nothings must not add up to a warning.
+    noise_floor: float = 0.15
 
 
 @dataclass
@@ -263,15 +275,39 @@ class Detector:
             intent = self.intent.classify(msg)
             intent_risk = intent.risk
             if fused and intent.is_malicious:
-                trusted = bool({"sender:platform-domain", "sender:institutional-domain"} & set(facts))
-                links_safe = not ({"links:off-platform", "links:lookalike", "links:embedded-domain"} & set(facts))
+                fset = set(facts)
+                # Who is the sender? Verified institutions, or an organisation on its own domain.
+                trusted = bool({"sender:platform-domain", "sender:institutional-domain"} & fset)
+                own_org = "sender:unrelated-domain" in fset and not display_claims_brand
+                # A peer on free webmail who asks for nothing and links nowhere is a peer.
+                peer = ("sender:free-webmail" in fset and not display_claims_brand
+                        and "links:none" in fset)
+                # Do the links go anywhere the sender does not control?
+                links_safe = not ({"links:lookalike", "links:embedded-domain"} & fset) and (
+                    "links:off-platform" not in fset or "links:same-as-sender" in fset)
+                # Is anything sensitive actually asked for? Judged by the deterministic cue
+                # detector on the text, not by the model's self-reported signals, which a
+                # small model invents ("requests sensitive documents" for a resume).
+                asked: set[str] = set()
+                for view in text_views(_normalize(f"{msg.subject}\n{msg.body}")):
+                    asked |= detect_signals(view)
                 sensitive = bool({"credential_request", "payment_request", "personal_data_request",
-                                  "off_platform_move"} & set(intent.signals))
-                if trusted and links_safe and not sensitive:
-                    # The classifier called it impersonation, but the sender is verifiably the
-                    # institution it claims to be, asks for nothing, and links nowhere else.
+                                  "off_platform_move", "too_good_to_be_true"} & asked) \
+                    or "injection_attempt" in intent.signals
+                # The body claims the platform's authority ("Warning from <brand> Trust and
+                # Safety") but the sender is not the platform: never discount that.
+                body_tokens = set(tokenize(msg.body))
+                claims_platform_in_body = (not trusted and "authority_claim" in asked
+                                           and bool(self.scorer.extractor.brands & body_tokens))
+                if (trusted or own_org or peer) and links_safe and not sensitive and not claims_platform_in_body:
+                    # The classifier called it an attack, but the sender is who it says it is
+                    # (or at least an organisation on its own domain), asks for nothing
+                    # sensitive, and links nowhere it does not control. That is a notice or an
+                    # ordinary recruiter, whatever its tone.
                     intent_risk *= 0.25
-                    reasons.append("fusion: trusted sender, no sensitive request, no off-platform link; "
+                    who = ("trusted sender" if trusted else
+                           "organisation on its own domain" if own_org else "peer on webmail")
+                    reasons.append(f"fusion: {who}, no sensitive request, no foreign link; "
                                    f"L3 {intent.label} discounted")
             risks.append(intent_risk)
             if intent.is_malicious:
@@ -285,7 +321,9 @@ class Detector:
 
         survive = 1.0
         for r in risks:
-            survive *= 1.0 - max(0.0, min(1.0, r))
+            r = max(0.0, min(1.0, r))
+            if r >= self.thresholds.noise_floor:
+                survive *= 1.0 - r
         risk = max(1.0 - survive, floor)
         return Verdict(risk, self._action(risk), reasons, sender_score, link_scores,
                        lookalikes, intent)

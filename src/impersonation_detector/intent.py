@@ -251,12 +251,19 @@ def text_views(text: str) -> tuple[str, ...]:
     return tuple(views)
 
 
+# "if you don't verify" / "unless you confirm" / "failure to update" is a threat, not advice.
+_CONDITIONAL = re.compile(r"\b(if you (don'?t|do not|fail to|never|won'?t)|unless you|failure to|should you (not|fail))\b",
+                          re.IGNORECASE)
+
+
 def detect_signals(text: str) -> set[str]:
     found: set[str] = set()
     for name, rx in CUES.items():
         for m in rx.finditer(text):
-            if name in _NEGATABLE and _NEGATION.search(text[max(0, m.start() - 45):m.start()]):
-                continue
+            if name in _NEGATABLE:
+                before = text[max(0, m.start() - 45):m.start()]
+                if _NEGATION.search(before) and not _CONDITIONAL.search(before):
+                    continue
             found.add(name)
             break
     return found

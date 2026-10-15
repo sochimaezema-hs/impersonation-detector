@@ -79,3 +79,14 @@ def test_middleware_blocks_and_passes_verdict():
     def plain_send(msg):
         return "plain"
     assert Middleware(det).wrap(plain_send)(Message(body="hi", sender_address="a@b.io")) == "plain"
+
+
+def test_noise_floor_keeps_weak_evidence_from_adding_up():
+    from impersonation_detector.intent import LLMIntentClassifier, StaticBackend
+    be = StaticBackend('{"label":"recruiter_scam","confidence":0.8,"signals":["too_good_to_be_true"]}')
+    d = Detector(PROTECTED, intent=LLMIntentClassifier(be))
+    v = d.analyze(Message(body="We have a summer internship in Austin ($42/hour). Posting: "
+                               "https://acmerobotics.com/careers/1234. Free for an intro call next week?",
+                          sender_name="Luis Garcia", sender_address="luis.garcia@acmerobotics.com"))
+    assert v.action == "allow", v.to_dict()
+    assert any(r.startswith("fusion:") for r in v.reasons)

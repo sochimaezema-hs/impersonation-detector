@@ -1,6 +1,6 @@
 # impersonation-detector benchmark v0.2.0
 
-Generated 2026-10-14T03:37:13+00:00 on Darwin arm64 / Python 3.12.10. Intent backend: `llm:ollama/llama3.1:8b`. Seed corpus: 76 messages (benign 30, credential_phish 10, payment_redirect 8, recruiter_scam 14, support_impersonation 14).
+Generated 2026-10-15T08:01:32+00:00 on Darwin arm64 / Python 3.12.10. Intent backend: `llm:ollama/llama3.1:8b`. Seed corpus: 76 messages (benign 30, credential_phish 10, payment_redirect 8, recruiter_scam 14, support_impersonation 14).
 
 Flagged means: flagged = any L1 match | max L2 score >= 0.5 | L3 label malicious or unknown | pipeline action != allow.
 
@@ -8,20 +8,20 @@ Flagged means: flagged = any L1 match | max L2 score >= 0.5 | L3 label malicious
 
 | Config | clean | homoglyph | zero_width | leet | spaced | synonym | injection | link_homoglyph | link_subdomain | sender_homoglyph |
 |---|---|---|---|---|---|---|---|---|---|---|
-| L3 | R 1.00 / FPR 0.33 | R 1.00 / FPR 0.30 | R 1.00 / FPR 0.30 | R 1.00 / FPR 0.43 | R 1.00 / FPR 0.37 | R 1.00 / FPR 0.33 | R 1.00 | R 1.00 | R 1.00 | R 1.00 |
-| L1+L2+L3 | R 1.00 / FPR 0.33 | R 1.00 / FPR 0.33 | R 1.00 / FPR 0.33 | R 1.00 / FPR 0.43 | R 1.00 / FPR 0.37 | R 1.00 / FPR 0.33 | R 1.00 | R 1.00 | R 1.00 | R 1.00 |
+| L3 | R 1.00 / FPR 0.40 | – | R 1.00 / FPR 0.43 | – | – | – | R 1.00 | – | – | – |
+| L1+L2+L3 | R 1.00 / FPR 0.00 | – | R 1.00 / FPR 0.00 | – | – | – | R 1.00 | – | – | – |
 
 ## Per-class recall (clean) and injection hijack
 
 | Config | credential_phish | payment_redirect | recruiter_scam | support_impersonation | hijacked (injection) | unknown (injection) | p50 ms |
 |---|---|---|---|---|---|---|---|
-| L3 | 1.00 | 1.00 | 1.00 | 1.00 | 0 | 5 | 0.02 |
-| L1+L2+L3 | 1.00 | 1.00 | 1.00 | 1.00 | 0 | 5 | 0.39 |
+| L3 | 1.00 | 1.00 | 1.00 | 1.00 | 0 | 6 | 0.03 |
+| L1+L2+L3 | 1.00 | 1.00 | 1.00 | 1.00 | 0 | 5 | 0.75 |
 
 ## Variants
 
 - **clean**: unmodified seed message
-- **homoglyph**: one confusable glyph in cue words, brand, link hosts
+- **homoglyph**: one confusable glyph in cue words and brand (body text; URLs untouched)
 - **zero_width**: zero-width space inside cue words and brand
 - **leet**: digit substitutions in cue words
 - **spaced**: cue words letter-spaced

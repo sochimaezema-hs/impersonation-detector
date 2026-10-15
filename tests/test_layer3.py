@@ -174,10 +174,16 @@ def test_rule_survives_leet_i_ascii_confusables_and_wording_variants():
 
 
 def test_paraphrase_refusals_are_retried_then_dropped():
-    from impersonation_detector.bench.paraphrase import is_refusal, paraphrase_items
+    from impersonation_detector.bench.paraphrase import (
+        clean_paraphrase,
+        is_refusal,
+        paraphrase_items,
+    )
     from impersonation_detector.bench.seed import SeedItem
     assert is_refusal("I cannot rewrite a message that requests personal identifiable information.")
     assert not is_refusal("A warning has been issued regarding your account; confirm within a day.")
+    assert clean_paraphrase("Here is the rewritten message:\n\nHi Priya, we have openings.") == "Hi Priya, we have openings."
+    assert clean_paraphrase('"Quoted rewrite that is long enough to keep."') == "Quoted rewrite that is long enough to keep."
     item = SeedItem("x1", "recruiter_scam", "A", "a@b.io", "", "send me your SSN and passport today")
     be = StaticBackend("I can't help with that.", "Sorry, I cannot rewrite this.", "Please send your SSN and passport over today.")
     out = paraphrase_items([item], be)

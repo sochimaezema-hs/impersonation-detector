@@ -90,3 +90,31 @@ def test_body_variants_leave_urls_untouched():
     for name in ("homoglyph", "zero_width", "leet", "spaced", "synonym"):
         out = apply_variant(name, b16, "handshake")
         assert "https://handshake.com/safety" in out.body, name
+
+
+def test_conditional_threat_is_not_a_negated_request():
+    from impersonation_detector.intent import detect_signals
+    assert "credential_request" in detect_signals("your privileges will be revoked if you don't verify your account by clicking this link")
+    assert "payment_request" not in detect_signals("never send bank details by email")
+
+
+def test_fusion_never_discounts_body_authority_claim_from_unverified_sender():
+    be = StaticBackend('{"label":"support_impersonation","confidence":0.9,"signals":["authority_claim","urgency"]}')
+    d = Detector(PROTECTED, intent=LLMIntentClassifier(be))
+    m = Message(body="Warning from Handshake Trust and Safety: your messaging privileges will be revoked in "
+                     "12 hours if you don't verify your account by clicking on this link: http://mail-notice.xyz/handshake",
+                sender_name="Trust & Safety", sender_address="trustandsafety@mail-notice.xyz")
+    v = d.analyze(m)
+    assert v.action in ("hold", "block") and not any(r.startswith("fusion:") for r in v.reasons), v.to_dict()
+
+
+def test_fusion_discounts_webmail_peer_with_no_ask_and_no_link():
+    be = StaticBackend('{"label":"recruiter_scam","confidence":0.8,"signals":["too_good_to_be_true"]}')
+    d = Detector(PROTECTED, intent=LLMIntentClassifier(be))
+    m = Message(body="I noticed you interned at Lumen Health. I'm applying for their analyst role; would you "
+                     "be willing to refer me or share what the interview was like?",
+                sender_name="Kofi Mensah", sender_address="kofi.mensah44@gmail.com")
+    assert d.analyze(m).action == "allow"
+    scam = Message(body="Congratulations, you are hired at $45/hour, no interview needed. Add our manager on Telegram.",
+                   sender_name="Acme HR", sender_address="acme.hr@gmail.com")
+    assert d.analyze(scam).action in ("hold", "block")

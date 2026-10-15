@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "impersonation-detector"
-version = "0.2.0"
+version = "0.3.0"
 description = "Detect lookalike domains, spoofed senders, and brand/support-team impersonation in messages — Unicode confusables (UTS #39), mixed-script checks, and learned scoring, built as middleware for messaging platforms."
 readme = "README.md"
 license = { text = "MIT" }

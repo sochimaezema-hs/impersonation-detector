@@ -1,5 +1,33 @@
 # Changelog
 
+## 0.3.0 — 2026-10-15
+
+Layer 2 → Layer 3 fusion and the closing of every measured gap.
+
+- **Fusion.** The pipeline computes structured sender facts from Layers 1–2 (platform-owned,
+  institutional, free-webmail, lookalike, or unrelated sender domain; display name claims
+  the brand; link hosts platform-only / off-platform / same-as-sender / lookalike /
+  embedded-domain) and hands them to both Layer 3 classifiers. The LLM prompt carries the
+  platform policy; the rule classifier uses the facts directly. A deterministic discount
+  applies when a verified institution, an organisation on its own domain, or a webmail
+  peer asks for nothing sensitive (judged by the cue detector over de-obfuscated views,
+  never by the model's self-reported signals), links nowhere it does not control, and does
+  not claim the platform's authority in the body.
+- **Evidence floor.** Risk components below 0.15 no longer combine, so three weak
+  nothings cannot add up to a warning. `Thresholds.noise_floor`.
+- **Brand-agnostic embedded-domain detection** (`orbitallabs.io.docs-share.site`): a new
+  Layer 2 feature and a Layer 1 floor when a link embeds the sender's own domain.
+- **Cues.** 1→i leet view, rn→m / vv→w ASCII-confusable view, "log on", N-digit codes,
+  prepaid and branded cards, BEC pretexts, "verify it", conditional threats ("if you don't
+  verify") no longer read as negated requests. Host extraction strips zero-width characters.
+- **Benchmark.** Body-text variants leave URLs and bare domains untouched. The paraphrase
+  generator strips preambles, retries refusals with a second prompt, and drops the rest.
+  Persistent LLM cache; `--only-extra`; held-out Gemma-paraphrased corpus.
+- Results (full pipeline, recall / FPR): rule 1.00 / 0.00 on all ten variants and on the
+  Llama-paraphrased corpus; Llama 3.1 8B and Gemma 3 27B 1.00 / 0.00 on clean, zero-width,
+  injection, and the paraphrased corpus. See README for the held-out set and caveats.
+- 78 tests.
+
 ## 0.2.0 — 2026-10-13
 
 The other two legs of the endeavor, same approach as the message detector.
